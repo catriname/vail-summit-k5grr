@@ -14,7 +14,7 @@
  * keypress to feed that silence. MorseDecoderDirect decouples flushing from
  * key events: it tracks silence internally and exposes tick(), which should be
  * called every ~5ms by a hardware timer task. When silence since the last tone
- * element exceeds 2.0x ditLen, tick() calls flush() directly so the character
+ * element exceeds 2.5x ditLen, tick() calls flush() directly so the character
  * is emitted immediately without waiting for the operator to start the next one.
  *
  * Word spacing is still handled by the base class: when the next tone starts,
@@ -57,7 +57,7 @@ public:
     if (!inSilence || charFlushed || isEmpty()) return;
 
     unsigned long silenceMs = millis() - lastToneEndMs;
-    if (silenceMs >= (unsigned long)(getDitLen() * 2.0f)) {
+    if (silenceMs >= (unsigned long)(getDitLen() * 2.5f)) {
       flush();
       charFlushed = true;
     }
