@@ -2,6 +2,18 @@
 
 This document covers required library versions and configuration changes discovered during build troubleshooting. These are not obvious from the standard BUILDING.md instructions.
 
+## arduino-cli Folder
+
+The `arduino-cli/` folder (containing `arduino-cli.exe`, `arduino-cli.yaml`, libraries, and toolchain packages) is **not committed to the repository** — it is listed in `.gitignore` because of its size.
+
+When setting up a fresh clone, copy this folder from another working copy of the project:
+
+```powershell
+Copy-Item -Path <source-repo>\arduino-cli -Destination <this-repo>\arduino-cli -Recurse
+```
+
+The `build.ps1` script expects `arduino-cli.exe` at `arduino-cli\arduino-cli.exe` relative to the project root. Without this folder the script will fail immediately.
+
 ## Library Versions
 
 ### LovyanGFX — must be 1.2.19
