@@ -361,7 +361,7 @@ static void vm_practice_key_handler(lv_event_t* e) {
             // Pause and go to settings - full cleanup to prevent delay
             vmActive = false;
             stopTone();
-            vmDecoder.flush();
+            vmDecoder->flush();
             onLVGLMenuSelect(MODE_VAIL_MASTER_SETTINGS);
             break;
     }

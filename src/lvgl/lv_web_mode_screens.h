@@ -152,8 +152,8 @@ void cleanupWebPracticeMode() {
     cleanupPracticeWebSocket();
     webPracticeModeActive = false;
     webPracticeStatusLabel = NULL;
-    extern MorseDecoderAdaptive webPracticeDecoder;
-    webPracticeDecoder.reset();
+    extern MorseDecoder* webPracticeDecoder;
+    if (webPracticeDecoder) webPracticeDecoder->reset();
 }
 
 // ============================================================
@@ -418,8 +418,8 @@ void cleanupWebMemoryChainMode() {
     cleanupMemoryChainWebSocket();
     webMemoryChainModeActive = false;
     webMemoryChainStatusLabel = NULL;
-    extern MorseDecoderAdaptive webMemoryChainDecoder;
-    webMemoryChainDecoder.reset();
+    extern MorseDecoder* webMemoryChainDecoder;
+    if (webMemoryChainDecoder) webMemoryChainDecoder->reset();
 }
 
 #endif // LV_WEB_MODE_SCREENS_H
