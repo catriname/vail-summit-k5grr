@@ -13,6 +13,7 @@
 #include "../audio/morse_decoder_adaptive.h"
 #include "../audio/morse_decoder_direct.h"
 #include "../keyer/keyer.h"
+#include <esp_timer.h>
 
 
 // Practice mode state
@@ -37,6 +38,14 @@ unsigned long practiceStartTime = 0;
 
 // Decoder state — pointer selects Adaptive or Direct at runtime
 static MorseDecoder* practiceDecoder = nullptr;
+
+// Timer for direct decoder tick (only used when DECODER_DIRECT is active)
+static esp_timer_handle_t decoderTickTimer = nullptr;
+static volatile bool decoderTickPending = false;
+
+static void decoderTickCallback(void*) {
+  decoderTickPending = true;
+}
 String decodedText = "";
 String decodedMorse = "";
 bool showDecoding = true;
@@ -114,10 +123,24 @@ void startPracticeMode(LGFX &display) {
   // Reset statistics
   practiceStartTime = millis();
 
+  // Stop any existing tick timer
+  if (decoderTickTimer != nullptr) {
+    esp_timer_stop(decoderTickTimer);
+    esp_timer_delete(decoderTickTimer);
+    decoderTickTimer = nullptr;
+  }
+  decoderTickPending = false;
+
   // Instantiate the selected decoder
   delete practiceDecoder;
   if (decoderType == DECODER_DIRECT) {
     practiceDecoder = new MorseDecoderDirect(cwSpeed, cwSpeed, 30);
+    // Start 5ms periodic timer to drive direct decoder tick
+    esp_timer_create_args_t timerArgs = {};
+    timerArgs.callback = decoderTickCallback;
+    timerArgs.name = "decoder_tick";
+    esp_timer_create(&timerArgs, &decoderTickTimer);
+    esp_timer_start_periodic(decoderTickTimer, 5000);  // 5000 µs = 5ms
   } else {
     practiceDecoder = new MorseDecoderAdaptive(cwSpeed, cwSpeed, 30);
   }
@@ -226,6 +249,12 @@ void updatePracticeOscillator() {
     return;
   }
 
+  // Service direct decoder tick (fires every 5ms via esp_timer)
+  if (decoderTickPending) {
+    decoderTickPending = false;
+    if (showDecoding) practiceDecoder->tick();
+  }
+
   // Flush buffered data after word gap silence
   if (showDecoding && lastElementTime > 0 && !ditPressed && !dahPressed) {
     unsigned long timeSinceLastElement = millis() - lastElementTime;
@@ -273,6 +302,12 @@ void updatePracticeOscillator() {
 void practiceHandleEsc() {
   practiceActive = false;
   stopTone();
+  if (decoderTickTimer != nullptr) {
+    esp_timer_stop(decoderTickTimer);
+    esp_timer_delete(decoderTickTimer);
+    decoderTickTimer = nullptr;
+  }
+  decoderTickPending = false;
   if (practiceKeyer) {
     practiceKeyer->reset();
   }

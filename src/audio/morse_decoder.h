@@ -173,11 +173,19 @@ public:
     updateThresholds();
   }
 
+  virtual ~MorseDecoder() {}
+
+  bool isEmpty() const { return unusedTimes.empty(); }
+  float getDitLen() const { return ditLen; }
+
+  // Called periodically by external timer; override in subclasses for proactive flushing
+  virtual void tick() {}
+
   /**
    * Add a timing value to the decoder
    * @param duration Positive for tone-on, negative for silence
    */
-  void addTiming(float duration) {
+  virtual void addTiming(float duration) {
     // Get last timing if buffer not empty
     float last = unusedTimes.empty() ? 0 : unusedTimes.back();
 
@@ -338,7 +346,7 @@ public:
   /**
    * Reset decoder state
    */
-  void reset() {
+  virtual void reset() {
     unusedTimes.clear();
     timings.clear();
     characters.clear();
