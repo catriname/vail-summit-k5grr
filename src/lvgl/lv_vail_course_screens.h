@@ -68,11 +68,7 @@ lv_obj_t* createVailCourseModuleSelectScreen() {
     lv_obj_set_style_border_width(header, 0, 0);
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t* title = lv_label_create(header);
-    lv_label_set_text(title, "Vail CW Course - Modules");
-    lv_obj_set_style_text_font(title, getThemeFonts()->font_input, 0);
-    lv_obj_set_style_text_color(title, LV_COLOR_TEXT_PRIMARY, 0);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
+    createSplitTitleLabel(header, "VAIL COURSE", "MODULES");
 
     // Account status in header
     lv_obj_t* status = lv_label_create(header);
@@ -178,13 +174,7 @@ lv_obj_t* createVailCourseLessonSelectScreen() {
     lv_obj_set_style_border_width(header, 0, 0);
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t* title = lv_label_create(header);
-    char titleText[64];
-    snprintf(titleText, sizeof(titleText), "%s - Lessons", vailCourseModuleNames[module]);
-    lv_label_set_text(title, titleText);
-    lv_obj_set_style_text_font(title, getThemeFonts()->font_input, 0);
-    lv_obj_set_style_text_color(title, LV_COLOR_TEXT_PRIMARY, 0);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
+    createSplitTitleLabel(header, vailCourseModuleNames[module], "LESSONS");
 
     // Characters info
     lv_obj_t* chars_label = lv_label_create(header);
@@ -1108,15 +1098,9 @@ lv_obj_t* createVailCourseLessonScreen() {
     lv_obj_set_style_border_width(header, 0, 0);
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t* title = lv_label_create(header);
-    char titleText[64];
-    snprintf(titleText, sizeof(titleText), "%s - Lesson %d",
-             vailCourseModuleNames[vailCourseProgress.currentModule],
-             vailCourseProgress.currentLesson);
-    lv_label_set_text(title, titleText);
-    lv_obj_set_style_text_font(title, getThemeFonts()->font_input, 0);
-    lv_obj_set_style_text_color(title, LV_COLOR_TEXT_PRIMARY, 0);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
+    char lessonSubtitle[16];
+    snprintf(lessonSubtitle, sizeof(lessonSubtitle), "LESSON %d", vailCourseProgress.currentLesson);
+    createSplitTitleLabel(header, vailCourseModuleNames[vailCourseProgress.currentModule], lessonSubtitle);
 
     // Phase indicator
     lessonState.phase_label = lv_label_create(header);
@@ -1219,11 +1203,7 @@ lv_obj_t* createVailCourseProgressScreen() {
     lv_obj_set_style_border_width(header, 0, 0);
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t* title = lv_label_create(header);
-    lv_label_set_text(title, "Vail CW Course - Progress");
-    lv_obj_set_style_text_font(title, getThemeFonts()->font_input, 0);
-    lv_obj_set_style_text_color(title, LV_COLOR_TEXT_PRIMARY, 0);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
+    createSplitTitleLabel(header, "VAIL COURSE", "PROGRESS");
 
     // Stats container
     lv_obj_t* stats = lv_obj_create(screen);

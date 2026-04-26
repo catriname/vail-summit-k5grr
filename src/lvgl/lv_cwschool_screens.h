@@ -244,11 +244,7 @@ lv_obj_t* createCWSchoolLinkScreen() {
     lv_obj_set_style_border_width(header, 0, 0);
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t* title = lv_label_create(header);
-    lv_label_set_text(title, "Link CW School Account");
-    lv_obj_set_style_text_font(title, getThemeFonts()->font_input, 0);
-    lv_obj_set_style_text_color(title, LV_COLOR_TEXT_PRIMARY, 0);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
+    createSplitTitleLabel(header, "VAIL CW SCHOOL", "LINK ACCOUNT");
 
     // Main content
     lv_obj_t* content = lv_obj_create(screen);
@@ -347,11 +343,7 @@ lv_obj_t* createCWSchoolAccountScreen() {
     lv_obj_set_style_border_width(header, 0, 0);
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t* title = lv_label_create(header);
-    lv_label_set_text(title, "CW School Account");
-    lv_obj_set_style_text_font(title, getThemeFonts()->font_input, 0);
-    lv_obj_set_style_text_color(title, LV_COLOR_TEXT_PRIMARY, 0);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
+    createSplitTitleLabel(header, "VAIL CW SCHOOL", "ACCOUNT");
 
     // Account info card
     lv_obj_t* card = lv_obj_create(screen);
@@ -520,9 +512,8 @@ lv_obj_t* createCWSchoolMenuScreen() {
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t* title = lv_label_create(header);
-    lv_label_set_text(title, "Vail CW School");
-    lv_obj_set_style_text_font(title, getThemeFonts()->font_input, 0);
-    lv_obj_set_style_text_color(title, LV_COLOR_TEXT_PRIMARY, 0);
+    lv_label_set_text(title, "VAIL CW SCHOOL");
+    lv_obj_add_style(title, getStyleLabelTitle(), 0);
     lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
 
     // Status indicator in header
