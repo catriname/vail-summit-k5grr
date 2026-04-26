@@ -226,7 +226,8 @@ lv_obj_t* createVailCourseLessonSelectScreen() {
             lv_obj_set_style_bg_color(btn, LV_COLOR_ACCENT_GREEN, LV_STATE_FOCUSED);
         } else if (current) {
             lv_obj_set_style_bg_color(btn, LV_COLOR_CARD_CYAN, 0);
-            lv_obj_set_style_bg_color(btn, LV_COLOR_CARD_BLUE, LV_STATE_FOCUSED);
+            lv_obj_set_style_bg_color(btn, LV_COLOR_ACCENT_BLUE, LV_STATE_FOCUSED);
+            lv_obj_set_style_text_color(btn, LV_COLOR_TEXT_PRIMARY, LV_STATE_FOCUSED);
         }
 
         lv_obj_t* lbl = lv_label_create(btn);

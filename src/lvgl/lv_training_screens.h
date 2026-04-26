@@ -3895,13 +3895,14 @@ lv_obj_t* createLicenseSelectScreen() {
         lv_obj_set_size(stats_card, lv_pct(100), 55);  // Stats card height
         lv_obj_set_style_bg_color(stats_card, getThemeColors()->card_secondary, 0);  // Theme card
         lv_obj_set_style_bg_opa(stats_card, LV_OPA_COVER, 0);
-        lv_obj_set_style_border_color(stats_card, LV_COLOR_ACCENT_CYAN, 0);
-        lv_obj_set_style_border_width(stats_card, 2, 0);
+        lv_obj_set_style_border_color(stats_card, LV_COLOR_BORDER_SUBTLE, 0);
+        lv_obj_set_style_border_width(stats_card, 1, 0);
         lv_obj_set_style_radius(stats_card, 10, 0);
         lv_obj_set_style_pad_all(stats_card, 10, 0);
         // Focused state
         lv_obj_set_style_bg_color(stats_card, LV_COLOR_ACCENT_CYAN, LV_STATE_FOCUSED);
         lv_obj_set_style_border_color(stats_card, LV_COLOR_BORDER_ACCENT, LV_STATE_FOCUSED);
+        lv_obj_set_style_border_width(stats_card, 2, LV_STATE_FOCUSED);
         lv_obj_set_style_shadow_width(stats_card, 20, LV_STATE_FOCUSED);
         lv_obj_set_style_shadow_color(stats_card, LV_COLOR_ACCENT_CYAN, LV_STATE_FOCUSED);
         lv_obj_set_style_shadow_opa(stats_card, LV_OPA_50, LV_STATE_FOCUSED);
@@ -3909,7 +3910,7 @@ lv_obj_t* createLicenseSelectScreen() {
         lv_obj_t* stats_title = lv_label_create(stats_card);
         lv_label_set_text(stats_title, "View Statistics");
         lv_obj_set_style_text_font(stats_title, getThemeFonts()->font_input, 0);
-        lv_obj_set_style_text_color(stats_title, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_text_color(stats_title, LV_COLOR_TEXT_PRIMARY, 0);
         lv_obj_set_style_text_color(stats_title, getThemeColors()->text_on_accent, LV_STATE_FOCUSED);
         lv_obj_align(stats_title, LV_ALIGN_TOP_LEFT, 0, 0);
 

@@ -101,7 +101,7 @@ lv_obj_t* createMenuCard(lv_obj_t* parent, const char* icon, const char* title, 
     lv_obj_t* icon_label = lv_label_create(icon_circle);
     lv_label_set_text(icon_label, icon);
     lv_obj_set_style_text_font(icon_label, getThemeFonts()->font_title, 0);
-    lv_obj_set_style_text_color(icon_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(icon_label, LV_COLOR_TEXT_PRIMARY, 0);
     lv_obj_center(icon_label);
 
     // Title label
