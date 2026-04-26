@@ -2013,12 +2013,7 @@ lv_obj_t* createCWAcademySessionSelectScreen() {
     lv_obj_add_style(title_bar, getStyleStatusBar(), 0);
     lv_obj_clear_flag(title_bar, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t* title = lv_label_create(title_bar);
-    char title_text[48];
-    snprintf(title_text, sizeof(title_text), "CW ACADEMY - %s", cwaTrackNames[cwaSelectedTrack]);
-    lv_label_set_text(title, title_text);
-    lv_obj_add_style(title, getStyleLabelTitle(), 0);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
+    createSplitTitleLabel(title_bar, "CW ACADEMY", cwaTrackNames[cwaSelectedTrack]);
 
     // Status bar
     createCompactStatusBar(screen);
@@ -2118,12 +2113,9 @@ lv_obj_t* createCWAcademyPracticeTypeSelectScreen() {
     lv_obj_add_style(title_bar, getStyleStatusBar(), 0);
     lv_obj_clear_flag(title_bar, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t* title = lv_label_create(title_bar);
-    char title_text[48];
-    snprintf(title_text, sizeof(title_text), "SESSION %d - PRACTICE TYPE", cwaSelectedSession);
-    lv_label_set_text(title, title_text);
-    lv_obj_add_style(title, getStyleLabelTitle(), 0);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
+    char session_str[16];
+    snprintf(session_str, sizeof(session_str), "SESSION %d", cwaSelectedSession);
+    createSplitTitleLabel(title_bar, session_str, "PRACTICE TYPE");
 
     // Status bar
     createCompactStatusBar(screen);
@@ -2222,12 +2214,7 @@ lv_obj_t* createCWAcademyMessageTypeSelectScreen() {
     lv_obj_add_style(title_bar, getStyleStatusBar(), 0);
     lv_obj_clear_flag(title_bar, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t* title = lv_label_create(title_bar);
-    char title_text[48];
-    snprintf(title_text, sizeof(title_text), "%s - MESSAGE TYPE", cwaPracticeTypeNames[cwaSelectedPracticeType]);
-    lv_label_set_text(title, title_text);
-    lv_obj_add_style(title, getStyleLabelTitle(), 0);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
+    createSplitTitleLabel(title_bar, cwaPracticeTypeNames[cwaSelectedPracticeType], "MESSAGE TYPE");
 
     // Status bar
     createCompactStatusBar(screen);
@@ -2706,10 +2693,7 @@ lv_obj_t* createCWAcademyCopyPracticeScreen() {
     lv_obj_add_style(title_bar, getStyleStatusBar(), 0);
     lv_obj_clear_flag(title_bar, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t* title = lv_label_create(title_bar);
-    lv_label_set_text(title, "CW ACADEMY - COPY PRACTICE");
-    lv_obj_add_style(title, getStyleLabelTitle(), 0);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
+    createSplitTitleLabel(title_bar, "CW ACADEMY", "COPY PRACTICE");
 
     createCompactStatusBar(screen);
 

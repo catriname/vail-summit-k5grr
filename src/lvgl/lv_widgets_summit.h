@@ -444,6 +444,43 @@ lv_obj_t* createCompactStatusBar(lv_obj_t* parent) {
     return batt_icon;
 }
 
+/*
+ * Create a split title bar label: mainTitle in title font, " // subTitle" in subtitle font.
+ * Renders both on one visual line inside a transparent flex-row container.
+ * Returns the container object.
+ *
+ * Parameters:
+ *   parent    - Title bar object (must use manual/absolute layout, not flex)
+ *   mainTitle - Primary section name (e.g. "CW ACADEMY")
+ *   subTitle  - Secondary section name (e.g. "COPY PRACTICE")
+ */
+lv_obj_t* createSplitTitleLabel(lv_obj_t* parent, const char* mainTitle, const char* subTitle) {
+    lv_obj_t* ctn = lv_obj_create(parent);
+    lv_obj_set_size(ctn, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_style_bg_opa(ctn, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(ctn, 0, 0);
+    lv_obj_set_style_pad_all(ctn, 0, 0);
+    lv_obj_set_layout(ctn, LV_LAYOUT_FLEX);
+    lv_obj_set_flex_flow(ctn, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(ctn, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER);
+    lv_obj_clear_flag(ctn, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_align(ctn, LV_ALIGN_LEFT_MID, 15, 0);
+
+    lv_obj_t* main_lbl = lv_label_create(ctn);
+    lv_label_set_text(main_lbl, mainTitle);
+    lv_obj_add_style(main_lbl, getStyleLabelTitle(), 0);
+
+    lv_obj_t* sub_lbl = lv_label_create(ctn);
+    char sub_text[80];
+    snprintf(sub_text, sizeof(sub_text), " // %s", subTitle);
+    for (char* p = sub_text + 4; *p; p++) *p = toupper((unsigned char)*p);
+    lv_label_set_text(sub_lbl, sub_text);
+    lv_obj_set_style_text_font(sub_lbl, getThemeFonts()->font_input, 0);
+    lv_obj_set_style_text_color(sub_lbl, LV_COLOR_TEXT_SECONDARY, 0);
+
+    return ctn;
+}
+
 // ============================================
 // Scrollable List Widget
 // ============================================

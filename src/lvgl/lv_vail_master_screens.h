@@ -386,10 +386,7 @@ lv_obj_t* createVailMasterPracticeScreen() {
     lv_obj_add_style(title_bar, getStyleStatusBar(), 0);
     lv_obj_clear_flag(title_bar, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t* title = lv_label_create(title_bar);
-    lv_label_set_text_fmt(title, "VAIL MASTER - %s", vmGetModeName(vmSession.mode));
-    lv_obj_add_style(title, getStyleLabelTitle(), 0);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
+    createSplitTitleLabel(title_bar, "VAIL MASTER", vmGetModeName(vmSession.mode));
 
     // Score on right side of title bar
     vm_score_label = lv_label_create(title_bar);

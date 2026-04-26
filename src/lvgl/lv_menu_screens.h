@@ -206,12 +206,10 @@ lv_obj_t* createHeader(lv_obj_t* parent, const char* title) {
     lv_obj_set_style_pad_all(header, 10, 0);
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
-    // Title - use theme font
     lv_obj_t* lbl_title = lv_label_create(header);
     lv_label_set_text(lbl_title, title);
-    lv_obj_set_style_text_font(lbl_title, getThemeFonts()->font_input, 0);  // Theme font
-    lv_obj_set_style_text_color(lbl_title, LV_COLOR_TEXT_PRIMARY, 0);
-    lv_obj_align(lbl_title, LV_ALIGN_LEFT_MID, 5, 0);
+    lv_obj_add_style(lbl_title, getStyleLabelTitle(), 0);
+    lv_obj_align(lbl_title, LV_ALIGN_LEFT_MID, 15, 0);
 
     // Mailbox icon (envelope) - shows when unread messages exist
     mailbox_status_icon = lv_label_create(header);
