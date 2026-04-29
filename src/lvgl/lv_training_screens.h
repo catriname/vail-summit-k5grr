@@ -2833,7 +2833,13 @@ static bool cwa_send_in_spacing = false;
 static bool cwa_send_dit_memory = false;
 static bool cwa_send_dah_memory = false;
 static int cwa_send_dit_duration = 0;
-static MorseDecoderAdaptive* cwa_send_decoder_ptr = NULL;
+static MorseDecoder* cwa_send_decoder_ptr = NULL;
+static esp_timer_handle_t cwaSendLVGLTickTimer = nullptr;
+static volatile bool cwaSendLVGLTickPending = false;
+
+static void cwaSendLVGLTickCallback(void*) {
+    cwaSendLVGLTickPending = true;
+}
 
 /*
  * Initialize sending practice state for LVGL mode
@@ -2862,12 +2868,25 @@ void initCWASendingPractice() {
     // Set up timing for 15 WPM sending speed
     cwa_send_dit_duration = DIT_DURATION(15);
 
-    // Initialize decoder
-    if (cwa_send_decoder_ptr == NULL) {
+    // Recreate decoder so decoderType changes take effect
+    if (cwaSendLVGLTickTimer != nullptr) {
+        esp_timer_stop(cwaSendLVGLTickTimer);
+        esp_timer_delete(cwaSendLVGLTickTimer);
+        cwaSendLVGLTickTimer = nullptr;
+    }
+    cwaSendLVGLTickPending = false;
+    delete cwa_send_decoder_ptr;
+    if (decoderType == DECODER_DIRECT) {
+        cwa_send_decoder_ptr = new MorseDecoderDirect(15, 15, 30);
+        esp_timer_create_args_t timerArgs = {};
+        timerArgs.callback = cwaSendLVGLTickCallback;
+        timerArgs.name = "cwa_lvgl_tick";
+        esp_timer_create(&timerArgs, &cwaSendLVGLTickTimer);
+        esp_timer_start_periodic(cwaSendLVGLTickTimer, 5000);
+    } else {
         cwa_send_decoder_ptr = new MorseDecoderAdaptive(15, 15, 30);
     }
     cwa_send_decoder_ptr->reset();
-    cwa_send_decoder_ptr->setWPM(15);
 
     // Set up decoder callback - uses thread-safe queue
     cwa_send_decoder_ptr->messageCallback = [](String morse, String text) {
@@ -3044,6 +3063,12 @@ void handleCWASendingStraightKeyDualCore() {
 void updateCWASendingPracticeLVGL() {
     if (cwa_send_state != CWA_SEND_SENDING) return;
     if (!cwa_send_screen) return;
+
+    // Service direct decoder tick
+    if (cwaSendLVGLTickPending) {
+        cwaSendLVGLTickPending = false;
+        if (cwa_send_decoder_ptr) cwa_send_decoder_ptr->tick();
+    }
 
     // Handle keyer based on type
     if (cwKeyType == KEY_STRAIGHT) {
