@@ -25,11 +25,20 @@
 #include "../core/config.h"
 #include "../core/task_manager.h"  // For dual-core audio API
 #include "../settings/settings_cw.h"
+#include "../settings/settings_decoder.h"
+#include "../audio/morse_decoder_adaptive.h"
+#include "../audio/morse_decoder_direct.h"
 #include "../keyer/keyer.h"
 #include "internet_check.h"
+#include <esp_timer.h>
 
 // Default channel - always defined
 String vailChannel = "General";
+
+// Settings persisted to NVS (declared before load/save functions that reference them)
+bool vailListenOnly = false;
+bool vailShowDecoded = false;
+bool vailShowMorseRow = true;
 
 // Preferences for Vail settings persistence
 Preferences vailPrefs;
@@ -38,6 +47,9 @@ Preferences vailPrefs;
 void loadVailSettings() {
   vailPrefs.begin("vail", true);  // Read-only mode
   vailChannel = vailPrefs.getString("room", "General");
+  vailListenOnly = vailPrefs.getBool("listenOnly", false);
+  vailShowDecoded = vailPrefs.getBool("showDecoded", false);
+  vailShowMorseRow = vailPrefs.getBool("showMorseRow", true);
   vailPrefs.end();
   Serial.printf("[Vail] Loaded room: %s\n", vailChannel.c_str());
 }
@@ -46,6 +58,9 @@ void loadVailSettings() {
 void saveVailSettings() {
   vailPrefs.begin("vail", false);  // Read-write mode
   vailPrefs.putString("room", vailChannel);
+  vailPrefs.putBool("listenOnly", vailListenOnly);
+  vailPrefs.putBool("showDecoded", vailShowDecoded);
+  vailPrefs.putBool("showMorseRow", vailShowMorseRow);
   vailPrefs.end();
   Serial.printf("[Vail] Saved room: %s\n", vailChannel.c_str());
 }
@@ -116,6 +131,116 @@ unsigned long playbackDelay = 500;  // 500ms delay for network jitter
 int64_t clockSkew = 0;  // Offset to convert millis() to server time
 int clockSkewSamples = 0;  // Number of clock skew samples received
 const float CLOCK_SKEW_ALPHA = 0.3f;  // Exponential moving average weight
+
+// TX morse compose state (updated on Core 1 via processKeyerOutput)
+String vailTxMorseSymbols = "";       // current char being keyed: ". - ." etc
+volatile bool vailTxDecodedReady = false;  // set when TX decoder emits a char
+char vailTxLastDecodedChar = 0;       // the decoded character
+
+// Decoded character slots shared with LVGL update
+#define VAIL_DECODE_SLOTS 12
+struct VailDecodedEntry {
+    char ch;
+    char morse[8];
+};
+VailDecodedEntry vailDecodedEntries[VAIL_DECODE_SLOTS];
+int vailDecodedCount = 0;
+volatile bool vailDecodedNeedsUpdate = false;
+
+// Decoders for RX and TX
+static MorseDecoder* vailRxDecoder = nullptr;
+static MorseDecoder* vailTxDecoder = nullptr;
+static esp_timer_handle_t vailRxTickTimer = nullptr;
+static esp_timer_handle_t vailTxTickTimer = nullptr;
+static volatile bool vailRxTickPending = false;
+static volatile bool vailTxTickPending = false;
+static unsigned long vailTxLastElementEndMs = 0;
+
+static void vailRxTickCallback(void*) { vailRxTickPending = true; }
+static void vailTxTickCallback(void*) { vailTxTickPending = true; }
+
+static void vailTxOnDecoded(String morse, String text) {
+    for (int i = 0; i < (int)text.length(); i++) {
+        vailTxLastDecodedChar = text[i];
+        vailTxDecodedReady = true;
+    }
+    // Append character separator — keep history, don't clear
+    vailTxMorseSymbols += " /";
+}
+
+static void vailOnDecoded(String morse, String text) {
+    for (int i = 0; i < (int)text.length(); i++) {
+        VailDecodedEntry entry;
+        entry.ch = text[i];
+        strncpy(entry.morse, morse.c_str(), sizeof(entry.morse) - 1);
+        entry.morse[sizeof(entry.morse) - 1] = '\0';
+        if (vailDecodedCount < VAIL_DECODE_SLOTS) {
+            vailDecodedEntries[vailDecodedCount++] = entry;
+        } else {
+            for (int j = 0; j < VAIL_DECODE_SLOTS - 1; j++)
+                vailDecodedEntries[j] = vailDecodedEntries[j + 1];
+            vailDecodedEntries[VAIL_DECODE_SLOTS - 1] = entry;
+        }
+    }
+    vailDecodedNeedsUpdate = true;
+}
+
+static void startVailDecoders() {
+    // RX decoder
+    if (vailRxTickTimer != nullptr) {
+        esp_timer_stop(vailRxTickTimer);
+        esp_timer_delete(vailRxTickTimer);
+        vailRxTickTimer = nullptr;
+    }
+    delete vailRxDecoder;
+    vailRxDecoder = (decoderType == DECODER_DIRECT)
+        ? (MorseDecoder*) new MorseDecoderDirect(cwSpeed, cwSpeed, 30)
+        : (MorseDecoder*) new MorseDecoderAdaptive(cwSpeed, cwSpeed, 30);
+    vailRxDecoder->messageCallback = vailOnDecoded;
+    esp_timer_create_args_t rxArgs = {};
+    rxArgs.callback = vailRxTickCallback;
+    rxArgs.name = "vail_rx_tick";
+    esp_timer_create(&rxArgs, &vailRxTickTimer);
+    esp_timer_start_periodic(vailRxTickTimer, 5000);
+
+    // TX decoder
+    if (vailTxTickTimer != nullptr) {
+        esp_timer_stop(vailTxTickTimer);
+        esp_timer_delete(vailTxTickTimer);
+        vailTxTickTimer = nullptr;
+    }
+    delete vailTxDecoder;
+    vailTxDecoder = (decoderType == DECODER_DIRECT)
+        ? (MorseDecoder*) new MorseDecoderDirect(cwSpeed, cwSpeed, 30)
+        : (MorseDecoder*) new MorseDecoderAdaptive(cwSpeed, cwSpeed, 30);
+    vailTxDecoder->messageCallback = vailTxOnDecoded;
+    esp_timer_create_args_t txArgs = {};
+    txArgs.callback = vailTxTickCallback;
+    txArgs.name = "vail_tx_tick";
+    esp_timer_create(&txArgs, &vailTxTickTimer);
+    esp_timer_start_periodic(vailTxTickTimer, 5000);
+
+    vailDecodedCount = 0;
+    vailDecodedNeedsUpdate = true;
+}
+
+static void stopVailDecoders() {
+    if (vailRxTickTimer != nullptr) {
+        esp_timer_stop(vailRxTickTimer);
+        esp_timer_delete(vailRxTickTimer);
+        vailRxTickTimer = nullptr;
+    }
+    if (vailTxTickTimer != nullptr) {
+        esp_timer_stop(vailTxTickTimer);
+        esp_timer_delete(vailTxTickTimer);
+        vailTxTickTimer = nullptr;
+    }
+    delete vailRxDecoder; vailRxDecoder = nullptr;
+    delete vailTxDecoder; vailTxDecoder = nullptr;
+    vailRxTickPending = false;
+    vailTxTickPending = false;
+    vailTxLastElementEndMs = 0;
+}
 
 // Playback state machine variables
 static bool isPlaying = false;
@@ -395,6 +520,9 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
         Serial.print("[WS] Connected to: ");
         Serial.println(url);
 
+        // Start decoders — TX always needed for chat compose, RX for display
+        startVailDecoders();
+
         // Send initial connection message (required by API)
         sendInitialMessage();
         lastKeepaliveTime = millis();  // Reset keepalive timer
@@ -646,6 +774,13 @@ void sendVailMessage(std::vector<uint16_t> durations, int64_t timestamp) {
 void vailKeyerCallback(bool txOn, int element) {
   unsigned long now = millis();
 
+  if (vailListenOnly) {
+    // Listen-only: play sidetone locally but skip all transmission tracking
+    if (txOn) startToneInternal(cwTone);
+    else stopToneInternal();
+    return;
+  }
+
   if (txOn) {
     // Element starting - play sidetone directly (we're on Core 0)
     startToneInternal(cwTone);
@@ -653,9 +788,6 @@ void vailKeyerCallback(bool txOn, int element) {
     // Track element start for duration calculation
     vailElementStartMillis = now;
     vailElementActive = true;
-
-    // Stop any playback (Core 0 can do this directly)
-    // Note: isPlaying is set by Core 1, but we can safely stop audio
   } else {
     // Element ending - stop sidetone directly (we're on Core 0)
     stopToneInternal();
@@ -699,16 +831,44 @@ void processKeyerOutput() {
   if (vailElementJustEnded) {
     vailElementJustEnded = false;  // Clear flag
 
+    // Feed TX decoder (always active for chat compose)
+    if (vailTxDecoder) {
+      if (vailTxLastElementEndMs > 0) {
+        float silence = -(float)(now - vailTxLastElementEndMs);
+        vailTxDecoder->addTiming(silence);
+      }
+      vailTxDecoder->addTiming((float)vailElementDuration);
+      vailTxLastElementEndMs = now;
+    }
+
     // Calculate server timestamp (must be done on Core 1)
     int64_t serverTs = getCurrentTimestamp();
 
-    // Send element to network
-    sendVailMessage({vailElementDuration}, serverTs);
-    vailTxStartTime = now;  // Reset idle timer
+    // Append dit or dah symbol for chat compose display
+    {
+      float ditMs = 1200.0f / (float)cwSpeed;
+      if (vailTxMorseSymbols.length() > 0) vailTxMorseSymbols += " ";
+      vailTxMorseSymbols += (vailElementDuration <= (uint16_t)(ditMs * 2.0f)) ? "." : "-";
 
-    if (!vailIsTransmitting) {
-      vailIsTransmitting = true;
-      vailTxDurations.clear();
+      // Trim from the left at a '/' boundary when history gets too long
+      if ((int)vailTxMorseSymbols.length() > 72) {
+        int slashPos = vailTxMorseSymbols.indexOf('/', 15);
+        if (slashPos >= 0 && slashPos + 3 < (int)vailTxMorseSymbols.length()) {
+          vailTxMorseSymbols = vailTxMorseSymbols.substring(slashPos + 2);
+        } else {
+          vailTxMorseSymbols = vailTxMorseSymbols.substring(vailTxMorseSymbols.length() - 50);
+        }
+      }
+    }
+
+    // Send element to network (skip if listen-only)
+    if (!vailListenOnly) {
+      sendVailMessage({vailElementDuration}, serverTs);
+      vailTxStartTime = now;  // Reset idle timer
+      if (!vailIsTransmitting) {
+        vailIsTransmitting = true;
+        vailTxDurations.clear();
+      }
     }
   }
 
@@ -736,6 +896,16 @@ void updateVailRepeater(LGFX &display) {
   if (vailState == VAIL_CONNECTED && (millis() - lastKeepaliveTime > 15000)) {
     sendKeepalive();
     lastKeepaliveTime = millis();
+  }
+
+  // Service decoder ticks (pending flags set by esp_timer ISR)
+  if (vailRxTickPending && vailRxDecoder) {
+    vailRxTickPending = false;
+    vailRxDecoder->tick();
+  }
+  if (vailTxTickPending && vailTxDecoder) {
+    vailTxTickPending = false;
+    vailTxDecoder->tick();
   }
 
   // Process keyer output for network transmission
@@ -836,9 +1006,12 @@ void playbackMessages() {
         Serial.print(msg.durations[playbackIndex]);
         Serial.print("ms ");
 
+        uint16_t elemDur = msg.durations[playbackIndex];
         if (playbackIndex % 2 == 0) {
           // Even index = tone
           Serial.println("TONE");
+          if (vailShowDecoded && vailRxDecoder)
+            vailRxDecoder->addTiming((float)elemDur);
           #if VAIL_USE_LOCAL_TONE_FOR_RECEIVE
             playbackToneFrequency = cwTone;
           #else
@@ -848,6 +1021,8 @@ void playbackMessages() {
         } else {
           // Odd index = silence
           Serial.println("SILENCE");
+          if (vailShowDecoded && vailRxDecoder)
+            vailRxDecoder->addTiming(-(float)elemDur);
           playbackToneFrequency = 0;
           requestStopTone();  // Non-blocking - audio task handles stop
         }
