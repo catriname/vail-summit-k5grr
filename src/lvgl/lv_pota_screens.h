@@ -346,7 +346,7 @@ lv_obj_t* createPOTAMenuScreen() {
         lv_obj_t* icon = lv_label_create(btn);
         lv_label_set_text(icon, potaMenuItems[i].icon);
         lv_obj_set_style_text_font(icon, &lv_font_montserrat_28, 0);
-        lv_obj_set_style_text_color(icon, LV_COLOR_TEXT_SECONDARY, 0);
+        lv_obj_set_style_text_color(icon, LV_COLOR_TEXT_PRIMARY, 0);
 
         // Title
         lv_obj_t* label = lv_label_create(btn);
