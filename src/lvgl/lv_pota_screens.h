@@ -316,20 +316,24 @@ lv_obj_t* createPOTAMenuScreen() {
     lv_obj_set_style_bg_opa(content, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(content, 0, 0);
     lv_obj_set_layout(content, LV_LAYOUT_FLEX);
-    lv_obj_set_flex_flow(content, LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_flex_flow(content, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(content, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_column(content, 20, 0);
-    lv_obj_set_style_pad_row(content, 15, 0);
+    lv_obj_set_style_pad_column(content, 15, 0);
     lv_obj_clear_flag(content, LV_OBJ_FLAG_SCROLLABLE);
 
     // Create menu buttons
     for (int i = 0; i < POTA_MENU_COUNT; i++) {
         lv_obj_t* btn = lv_obj_create(content);
-        lv_obj_set_size(btn, 200, 85);
+        lv_obj_set_size(btn, 140, 90);
         applyCardStyle(btn);
         lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_set_user_data(btn, (void*)(intptr_t)potaMenuItems[i].target_mode);
         lv_obj_clear_flag(btn, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_set_layout(btn, LV_LAYOUT_FLEX);
+        lv_obj_set_flex_flow(btn, LV_FLEX_FLOW_COLUMN);
+        lv_obj_set_flex_align(btn, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        lv_obj_set_style_pad_all(btn, 8, 0);
+        lv_obj_set_style_pad_row(btn, 4, 0);
 
         // Focus style
         lv_obj_set_style_border_color(btn, LV_COLOR_ACCENT_PRIMARY, LV_STATE_FOCUSED);
@@ -342,15 +346,13 @@ lv_obj_t* createPOTAMenuScreen() {
         lv_obj_t* icon = lv_label_create(btn);
         lv_label_set_text(icon, potaMenuItems[i].icon);
         lv_obj_set_style_text_font(icon, &lv_font_montserrat_28, 0);
-        lv_obj_set_style_text_color(icon, LV_COLOR_ACCENT_PRIMARY, 0);
-        lv_obj_align(icon, LV_ALIGN_TOP_MID, 0, 15);
+        lv_obj_set_style_text_color(icon, LV_COLOR_TEXT_SECONDARY, 0);
 
         // Title
         lv_obj_t* label = lv_label_create(btn);
         lv_label_set_text(label, potaMenuItems[i].title);
         lv_obj_set_style_text_font(label, &lv_font_montserrat_16, 0);
         lv_obj_set_style_text_color(label, LV_COLOR_TEXT_PRIMARY, 0);
-        lv_obj_align(label, LV_ALIGN_BOTTOM_MID, 0, -15);
 
         lv_obj_add_event_cb(btn, pota_menu_key_handler, LV_EVENT_KEY, NULL);
         pota_menu_buttons[i] = btn;
