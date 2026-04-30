@@ -59,7 +59,7 @@ static const LVMenuItem cwMenuItems[] = {
 static const LVMenuItem trainingMenuItems[] = {
     {LV_SYMBOL_EDIT, "Vail Master", MODE_VAIL_MASTER},
     {LV_SYMBOL_AUDIO, "Hear It Type It", MODE_HEAR_IT_MENU},
-    {LV_SYMBOL_SHUFFLE, "CW School", MODE_CWSCHOOL},
+    {LV_SYMBOL_SHUFFLE, "Vail CW School", MODE_CWSCHOOL},
     {LV_SYMBOL_FILE, "CW Academy", MODE_CW_ACADEMY_TRACK_SELECT},
     {LV_SYMBOL_SHUFFLE, "LICW Training", MODE_LICW_CAROUSEL_SELECT}
 };

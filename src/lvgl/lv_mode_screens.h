@@ -1657,12 +1657,12 @@ static void updateLandingButtonFocus() {
     for (int i = 0; i < 3; i++) {
         if (btns[i] == NULL) continue;
         bool sel = (vail_landing_focus == i);
-        lv_obj_set_style_border_color(btns[i], sel ? LV_COLOR_ACCENT_CYAN : LV_COLOR_BG_LAYER2, 0);
+        lv_obj_set_style_border_color(btns[i], sel ? LV_COLOR_ACCENT_PRIMARY : LV_COLOR_BG_LAYER2, 0);
         lv_obj_set_style_bg_color(btns[i], sel ? LV_COLOR_BG_LAYER2 : LV_COLOR_BG_DEEP, 0);
         // Update child icon (index 0) and label (index 1) colors
         lv_obj_t* icon = lv_obj_get_child(btns[i], 0);
         lv_obj_t* lbl  = lv_obj_get_child(btns[i], 1);
-        if (icon) lv_obj_set_style_text_color(icon, sel ? LV_COLOR_ACCENT_CYAN  : LV_COLOR_TEXT_SECONDARY, 0);
+        if (icon) lv_obj_set_style_text_color(icon, sel ? LV_COLOR_ACCENT_PRIMARY  : LV_COLOR_TEXT_SECONDARY, 0);
         if (lbl)  lv_obj_set_style_text_color(lbl,  sel ? LV_COLOR_TEXT_PRIMARY : LV_COLOR_TEXT_SECONDARY, 0);
     }
 }
@@ -1688,7 +1688,7 @@ static void refreshVailSettingsFocus() {
             sel ? LV_COLOR_BG_LAYER2 : LV_COLOR_BG_DEEP, 0);
         if (vail_srow_values[i] != NULL) {
             lv_obj_set_style_text_color(vail_srow_values[i],
-                sel ? LV_COLOR_ACCENT_CYAN : LV_COLOR_TEXT_SECONDARY, 0);
+                sel ? LV_COLOR_ACCENT_PRIMARY : LV_COLOR_TEXT_SECONDARY, 0);
         }
     }
 }
@@ -2598,7 +2598,7 @@ lv_obj_t* createVailRepeaterScreen() {
         lv_obj_t* btn = lv_obj_create(parent);
         lv_obj_set_size(btn, 138, 80);
         lv_obj_set_style_bg_color(btn, selected ? LV_COLOR_BG_LAYER2 : LV_COLOR_BG_DEEP, 0);
-        lv_obj_set_style_border_color(btn, selected ? LV_COLOR_ACCENT_CYAN : LV_COLOR_BG_LAYER2, 0);
+        lv_obj_set_style_border_color(btn, selected ? LV_COLOR_ACCENT_PRIMARY : LV_COLOR_BG_LAYER2, 0);
         lv_obj_set_style_border_width(btn, 2, 0);
         lv_obj_set_style_radius(btn, 8, 0);
         lv_obj_set_style_pad_all(btn, 6, 0);
@@ -2675,7 +2675,7 @@ lv_obj_t* createVailRepeaterScreen() {
     vail_morse_row_label = lv_label_create(vail_morse_row_bg);
     lv_label_set_text(vail_morse_row_label, "");
     lv_obj_set_style_text_font(vail_morse_row_label, getThemeFonts()->font_body, 0);
-    lv_obj_set_style_text_color(vail_morse_row_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(vail_morse_row_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(vail_morse_row_label, LV_ALIGN_LEFT_MID, 4, 0);
 
     // Message compose row at bottom
@@ -2741,7 +2741,7 @@ lv_obj_t* createVailRepeaterScreen() {
         vail_srow_values[i] = lv_label_create(vail_srow_containers[i]);
         lv_obj_set_style_text_font(vail_srow_values[i], getThemeFonts()->font_body, 0);
         lv_obj_set_style_text_color(vail_srow_values[i],
-            i == 0 ? LV_COLOR_ACCENT_CYAN : LV_COLOR_TEXT_SECONDARY, 0);
+            i == 0 ? LV_COLOR_ACCENT_PRIMARY : LV_COLOR_TEXT_SECONDARY, 0);
     }
     refreshVailSettingsValues();
 

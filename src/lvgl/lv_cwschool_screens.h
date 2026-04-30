@@ -152,6 +152,17 @@ static void cwschool_link_key_handler(lv_event_t* e) {
  * Create device linking screen
  */
 lv_obj_t* createCWSchoolLinkScreen() {
+    // Already linked — redirect to account screen
+    if (isCWSchoolLinked()) {
+        lv_timer_create([](lv_timer_t* t) {
+            lv_timer_del(t);
+            onLVGLMenuSelect(MODE_CWSCHOOL_ACCOUNT);
+        }, 0, NULL);
+        lv_obj_t* screen = createScreen();
+        applyScreenStyle(screen);
+        return screen;
+    }
+
     // Check internet first
     if (getInternetStatus() != INET_CONNECTED) {
         // Show error screen
@@ -513,17 +524,20 @@ lv_obj_t* createCWSchoolMenuScreen() {
 
     createSplitTitleLabel(header, "VAIL CW SCHOOL", "MENU");
 
-    // Status indicator in header
-    lv_obj_t* status_indicator = lv_label_create(header);
-    if (isCWSchoolLinked()) {
-        lv_label_set_text(status_indicator, getCWSchoolAccountDisplay().c_str());
-        lv_obj_set_style_text_color(status_indicator, LV_COLOR_SUCCESS, 0);
+    // Connection status dot
+    lv_obj_t* status_dot = lv_obj_create(header);
+    lv_obj_set_size(status_dot, 14, 14);
+    lv_obj_set_style_radius(status_dot, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_border_width(status_dot, 0, 0);
+    lv_obj_clear_flag(status_dot, LV_OBJ_FLAG_SCROLLABLE);
+    if (isCWSchoolLinked() && getInternetStatus() == INET_CONNECTED) {
+        lv_obj_set_style_bg_color(status_dot, LV_COLOR_SUCCESS, 0);
+    } else if (isCWSchoolLinked()) {
+        lv_obj_set_style_bg_color(status_dot, LV_COLOR_WARNING, 0);
     } else {
-        lv_label_set_text(status_indicator, "Not linked");
-        lv_obj_set_style_text_color(status_indicator, LV_COLOR_TEXT_TERTIARY, 0);
+        lv_obj_set_style_bg_color(status_dot, LV_COLOR_TEXT_SECONDARY, 0);
     }
-    lv_obj_set_style_text_font(status_indicator, getThemeFonts()->font_body, 0);
-    lv_obj_align(status_indicator, LV_ALIGN_RIGHT_MID, -15, 0);
+    lv_obj_align(status_dot, LV_ALIGN_RIGHT_MID, -15, 0);
 
     // Menu container
     lv_obj_t* menu_container = lv_obj_create(screen);
