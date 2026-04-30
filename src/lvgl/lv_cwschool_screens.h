@@ -1,4 +1,4 @@
-/*
+﻿/*
  * VAIL SUMMIT - CW School LVGL Screens
  * Device linking and account management for CW School integration
  */
@@ -65,11 +65,11 @@ static void cwschool_link_timer_cb(lv_timer_t* timer) {
                 break;
             case CWSCHOOL_LINK_CHECKING:
                 lv_label_set_text(cwschool_status_label, "Checking...");
-                lv_obj_set_style_text_color(cwschool_status_label, LV_COLOR_ACCENT_CYAN, 0);
+                lv_obj_set_style_text_color(cwschool_status_label, LV_COLOR_ACCENT_PRIMARY, 0);
                 break;
             case CWSCHOOL_LINK_EXCHANGING_TOKEN:
                 lv_label_set_text(cwschool_status_label, "Linking account...");
-                lv_obj_set_style_text_color(cwschool_status_label, LV_COLOR_ACCENT_CYAN, 0);
+                lv_obj_set_style_text_color(cwschool_status_label, LV_COLOR_ACCENT_PRIMARY, 0);
                 break;
             case CWSCHOOL_LINK_SUCCESS: {
                 Serial.println("[CWSchool] SUCCESS state - stopping timer and navigating");
@@ -279,7 +279,7 @@ lv_obj_t* createCWSchoolLinkScreen() {
     cwschool_code_label = lv_label_create(content);
     lv_label_set_text(cwschool_code_label, getCWSchoolLinkCode().c_str());
     lv_obj_set_style_text_font(cwschool_code_label, &lv_font_montserrat_28, 0);
-    lv_obj_set_style_text_color(cwschool_code_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(cwschool_code_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_letter_space(cwschool_code_label, 8, 0);
 
     // Status
@@ -401,7 +401,7 @@ lv_obj_t* createCWSchoolAccountScreen() {
     lv_obj_t* cs_val = lv_label_create(cs_row);
     lv_label_set_text(cs_val, getCWSchoolAccountDisplay().c_str());
     lv_obj_set_style_text_font(cs_val, getThemeFonts()->font_input, 0);
-    lv_obj_set_style_text_color(cs_val, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(cs_val, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(cs_val, LV_ALIGN_RIGHT_MID, 0, 0);
 
     // Display name row (if available)
@@ -474,7 +474,7 @@ lv_obj_t* createCWSchoolAccountScreen() {
         lv_obj_set_size(link_btn, 200, 50);
         lv_obj_align(link_btn, LV_ALIGN_BOTTOM_MID, 0, -60);
         lv_obj_set_style_bg_color(link_btn, LV_COLOR_SUCCESS, 0);
-        lv_obj_set_style_bg_color(link_btn, LV_COLOR_ACCENT_GREEN, LV_STATE_FOCUSED);
+        lv_obj_set_style_bg_color(link_btn, LV_COLOR_SUCCESS, LV_STATE_FOCUSED);
         lv_obj_set_style_radius(link_btn, 8, 0);
 
         lv_obj_t* link_lbl = lv_label_create(link_btn);
@@ -552,8 +552,8 @@ lv_obj_t* createCWSchoolMenuScreen() {
     // Account button
     lv_obj_t* account_btn = lv_btn_create(menu_container);
     lv_obj_set_size(account_btn, 350, 55);
-    lv_obj_set_style_bg_color(account_btn, LV_COLOR_CARD_TEAL, 0);
-    lv_obj_set_style_bg_color(account_btn, LV_COLOR_CARD_CYAN, LV_STATE_FOCUSED);
+    lv_obj_set_style_bg_color(account_btn, LV_COLOR_BG_CARD, 0);
+    lv_obj_set_style_bg_color(account_btn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
     lv_obj_set_style_radius(account_btn, 10, 0);
 
     lv_obj_t* account_lbl = lv_label_create(account_btn);
@@ -574,8 +574,8 @@ lv_obj_t* createCWSchoolMenuScreen() {
     // Training button - navigate to Vail Course module selection
     lv_obj_t* training_btn = lv_btn_create(menu_container);
     lv_obj_set_size(training_btn, 350, 55);
-    lv_obj_set_style_bg_color(training_btn, LV_COLOR_CARD_BLUE, 0);
-    lv_obj_set_style_bg_color(training_btn, LV_COLOR_CARD_CYAN, LV_STATE_FOCUSED);
+    lv_obj_set_style_bg_color(training_btn, LV_COLOR_BG_CARD_ALT, 0);
+    lv_obj_set_style_bg_color(training_btn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
     lv_obj_set_style_radius(training_btn, 10, 0);
 
     lv_obj_t* training_lbl = lv_label_create(training_btn);
@@ -593,8 +593,8 @@ lv_obj_t* createCWSchoolMenuScreen() {
     // Progress button - show course progress
     lv_obj_t* progress_btn = lv_btn_create(menu_container);
     lv_obj_set_size(progress_btn, 350, 55);
-    lv_obj_set_style_bg_color(progress_btn, LV_COLOR_CARD_MINT, 0);
-    lv_obj_set_style_bg_color(progress_btn, LV_COLOR_CARD_CYAN, LV_STATE_FOCUSED);
+    lv_obj_set_style_bg_color(progress_btn, LV_COLOR_BORDER_CARD, 0);
+    lv_obj_set_style_bg_color(progress_btn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
     lv_obj_set_style_radius(progress_btn, 10, 0);
 
     lv_obj_t* progress_lbl = lv_label_create(progress_btn);

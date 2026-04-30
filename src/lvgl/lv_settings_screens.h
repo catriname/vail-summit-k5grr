@@ -1,4 +1,4 @@
-/*
+﻿/*
  * VAIL SUMMIT - LVGL Settings Screens
  * Replaces LovyanGFX settings rendering with LVGL
  */
@@ -288,7 +288,7 @@ lv_obj_t* createVolumeSettingsScreen() {
     volume_value_label = lv_label_create(content);
     lv_label_set_text_fmt(volume_value_label, "%d%%", getVolume());
     lv_obj_set_style_text_font(volume_value_label, getThemeFonts()->font_large, 0);
-    lv_obj_set_style_text_color(volume_value_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(volume_value_label, LV_COLOR_ACCENT_PRIMARY, 0);
 
     // Volume slider
     volume_slider = lv_slider_create(content);
@@ -345,7 +345,7 @@ lv_obj_t* createVolumeSettingsScreen() {
     lv_obj_set_style_radius(boot_btn, 4, 0);
     lv_obj_set_style_border_width(boot_btn, 1, 0);
     lv_obj_set_style_border_color(boot_btn, lv_color_hex(0x666666), 0);
-    lv_obj_set_style_border_color(boot_btn, LV_COLOR_ACCENT_CYAN, LV_STATE_FOCUSED);
+    lv_obj_set_style_border_color(boot_btn, LV_COLOR_ACCENT_PRIMARY, LV_STATE_FOCUSED);
     lv_obj_set_style_pad_all(boot_btn, 4, 0);
 
     // Initialize boot preset index from saved preference
@@ -475,7 +475,7 @@ lv_obj_t* createBrightnessSettingsScreen() {
     brightness_value_label = lv_label_create(content);
     lv_label_set_text_fmt(brightness_value_label, "%d%%", brightnessValue);
     lv_obj_set_style_text_font(brightness_value_label, getThemeFonts()->font_large, 0);
-    lv_obj_set_style_text_color(brightness_value_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(brightness_value_label, LV_COLOR_ACCENT_PRIMARY, 0);
 
     // Brightness slider
     brightness_slider = lv_slider_create(content);
@@ -581,9 +581,9 @@ static void cw_update_focus() {
     // Speed row styling (focus == 0)
     if (cw_speed_row) {
         if (cw_settings_focus == 0) {
-            lv_obj_set_style_bg_color(cw_speed_row, LV_COLOR_CARD_TEAL, 0);
+            lv_obj_set_style_bg_color(cw_speed_row, LV_COLOR_BG_CARD, 0);
             lv_obj_set_style_bg_opa(cw_speed_row, LV_OPA_COVER, 0);
-            lv_obj_set_style_border_color(cw_speed_row, LV_COLOR_ACCENT_CYAN, 0);
+            lv_obj_set_style_border_color(cw_speed_row, LV_COLOR_ACCENT_PRIMARY, 0);
             lv_obj_set_style_border_width(cw_speed_row, 2, 0);
         } else {
             lv_obj_set_style_bg_opa(cw_speed_row, LV_OPA_TRANSP, 0);
@@ -601,9 +601,9 @@ static void cw_update_focus() {
     // Tone row styling (focus == 1)
     if (cw_tone_row) {
         if (cw_settings_focus == 1) {
-            lv_obj_set_style_bg_color(cw_tone_row, LV_COLOR_CARD_TEAL, 0);
+            lv_obj_set_style_bg_color(cw_tone_row, LV_COLOR_BG_CARD, 0);
             lv_obj_set_style_bg_opa(cw_tone_row, LV_OPA_COVER, 0);
-            lv_obj_set_style_border_color(cw_tone_row, LV_COLOR_ACCENT_CYAN, 0);
+            lv_obj_set_style_border_color(cw_tone_row, LV_COLOR_ACCENT_PRIMARY, 0);
             lv_obj_set_style_border_width(cw_tone_row, 2, 0);
         } else {
             lv_obj_set_style_bg_opa(cw_tone_row, LV_OPA_TRANSP, 0);
@@ -621,9 +621,9 @@ static void cw_update_focus() {
     // Key type row styling (focus == 2)
     if (cw_keytype_row) {
         if (cw_settings_focus == 2) {
-            lv_obj_set_style_bg_color(cw_keytype_row, LV_COLOR_CARD_TEAL, 0);
+            lv_obj_set_style_bg_color(cw_keytype_row, LV_COLOR_BG_CARD, 0);
             lv_obj_set_style_bg_opa(cw_keytype_row, LV_OPA_COVER, 0);
-            lv_obj_set_style_border_color(cw_keytype_row, LV_COLOR_ACCENT_CYAN, 0);
+            lv_obj_set_style_border_color(cw_keytype_row, LV_COLOR_ACCENT_PRIMARY, 0);
             lv_obj_set_style_border_width(cw_keytype_row, 2, 0);
         } else {
             lv_obj_set_style_bg_opa(cw_keytype_row, LV_OPA_TRANSP, 0);
@@ -632,15 +632,15 @@ static void cw_update_focus() {
     }
     if (cw_keytype_value) {
         lv_obj_set_style_text_color(cw_keytype_value,
-            cw_settings_focus == 2 ? LV_COLOR_ACCENT_CYAN : LV_COLOR_TEXT_SECONDARY, 0);
+            cw_settings_focus == 2 ? LV_COLOR_ACCENT_PRIMARY : LV_COLOR_TEXT_SECONDARY, 0);
     }
 
     // Decoder row styling (focus == 3)
     if (cw_decoder_row) {
         if (cw_settings_focus == 3) {
-            lv_obj_set_style_bg_color(cw_decoder_row, LV_COLOR_CARD_TEAL, 0);
+            lv_obj_set_style_bg_color(cw_decoder_row, LV_COLOR_BG_CARD, 0);
             lv_obj_set_style_bg_opa(cw_decoder_row, LV_OPA_COVER, 0);
-            lv_obj_set_style_border_color(cw_decoder_row, LV_COLOR_ACCENT_CYAN, 0);
+            lv_obj_set_style_border_color(cw_decoder_row, LV_COLOR_ACCENT_PRIMARY, 0);
             lv_obj_set_style_border_width(cw_decoder_row, 2, 0);
         } else {
             lv_obj_set_style_bg_opa(cw_decoder_row, LV_OPA_TRANSP, 0);
@@ -649,7 +649,7 @@ static void cw_update_focus() {
     }
     if (cw_decoder_value) {
         lv_obj_set_style_text_color(cw_decoder_value,
-            cw_settings_focus == 3 ? LV_COLOR_ACCENT_CYAN : LV_COLOR_TEXT_SECONDARY, 0);
+            cw_settings_focus == 3 ? LV_COLOR_ACCENT_PRIMARY : LV_COLOR_TEXT_SECONDARY, 0);
     }
 }
 
@@ -883,7 +883,7 @@ lv_obj_t* createCWSettingsScreen() {
 
     cw_speed_value = lv_label_create(speed_header);
     lv_label_set_text_fmt(cw_speed_value, "%d WPM", cwSpeed);
-    lv_obj_set_style_text_color(cw_speed_value, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(cw_speed_value, LV_COLOR_ACCENT_PRIMARY, 0);
 
     cw_speed_slider = lv_slider_create(cw_speed_row);
     lv_obj_set_width(cw_speed_slider, lv_pct(100));
@@ -921,7 +921,7 @@ lv_obj_t* createCWSettingsScreen() {
 
     cw_tone_value = lv_label_create(tone_header);
     lv_label_set_text_fmt(cw_tone_value, "%d Hz", cwTone);
-    lv_obj_set_style_text_color(cw_tone_value, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(cw_tone_value, LV_COLOR_ACCENT_PRIMARY, 0);
 
     cw_tone_slider = lv_slider_create(cw_tone_row);
     lv_obj_set_width(cw_tone_slider, lv_pct(100));
@@ -950,7 +950,7 @@ lv_obj_t* createCWSettingsScreen() {
     // Key type value - shows "< Straight >" style selector (like Hear It Type It)
     cw_keytype_value = lv_label_create(cw_keytype_row);
     lv_label_set_text_fmt(cw_keytype_value, "< %s >", cw_keytype_names[getCwKeyTypeAsInt()]);
-    lv_obj_set_style_text_color(cw_keytype_value, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(cw_keytype_value, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(cw_keytype_value, getThemeFonts()->font_subtitle, 0);
 
     // Decoder type setting row
@@ -971,7 +971,7 @@ lv_obj_t* createCWSettingsScreen() {
 
     cw_decoder_value = lv_label_create(cw_decoder_row);
     lv_label_set_text_fmt(cw_decoder_value, "< %s >", cw_decoder_names[decoderType]);
-    lv_obj_set_style_text_color(cw_decoder_value, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(cw_decoder_value, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(cw_decoder_value, getThemeFonts()->font_subtitle, 0);
 
     // Set initial focus styling
@@ -1127,7 +1127,7 @@ static void update_web_password_display() {
     if (web_password_toggle_label != NULL) {
         lv_label_set_text(web_password_toggle_label, web_password_enabled_state ? "ENABLED" : "DISABLED");
         lv_obj_set_style_text_color(web_password_toggle_label,
-            web_password_enabled_state ? LV_COLOR_ACCENT_GREEN : LV_COLOR_WARNING, 0);
+            web_password_enabled_state ? LV_COLOR_SUCCESS : LV_COLOR_WARNING, 0);
     }
     // Show/hide password field based on state
     if (web_password_field_container != NULL) {
@@ -1348,7 +1348,7 @@ lv_obj_t* createWebPasswordSettingsScreen() {
     lv_obj_set_style_radius(web_password_toggle_btn, 4, 0);
     lv_obj_set_style_border_width(web_password_toggle_btn, 1, 0);
     lv_obj_set_style_border_color(web_password_toggle_btn, lv_color_hex(0x666666), 0);
-    lv_obj_set_style_border_color(web_password_toggle_btn, LV_COLOR_ACCENT_CYAN, LV_STATE_FOCUSED);
+    lv_obj_set_style_border_color(web_password_toggle_btn, LV_COLOR_ACCENT_PRIMARY, LV_STATE_FOCUSED);
     lv_obj_set_style_pad_all(web_password_toggle_btn, 4, 0);
 
     // Initialize state from saved preference
@@ -1643,7 +1643,7 @@ lv_obj_t* createSystemInfoScreen() {
     // Firmware version (prominent)
     lv_obj_t* version_label = lv_label_create(content);
     lv_label_set_text_fmt(version_label, "v%s", FIRMWARE_VERSION);
-    lv_obj_set_style_text_color(version_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(version_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(version_label, getThemeFonts()->font_title, 0);
     lv_obj_set_width(version_label, lv_pct(100));
     lv_obj_set_style_text_align(version_label, LV_TEXT_ALIGN_CENTER, 0);

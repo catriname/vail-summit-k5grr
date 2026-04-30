@@ -1,4 +1,4 @@
-/*
+﻿/*
  * VAIL SUMMIT - LVGL Widget Factory
  * Reusable widget creation functions for consistent UI
  */
@@ -101,7 +101,7 @@ lv_obj_t* createMenuCard(lv_obj_t* parent, const char* icon, const char* title, 
     lv_obj_t* icon_label = lv_label_create(icon_circle);
     lv_label_set_text(icon_label, icon);
     lv_obj_set_style_text_font(icon_label, getThemeFonts()->font_title, 0);
-    lv_obj_set_style_text_color(icon_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(icon_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_center(icon_label);
 
     // Title label
@@ -162,7 +162,7 @@ lv_obj_t* createSettingsRow(lv_obj_t* parent, const char* label, const char* val
     // Value (highlighted) - use theme font
     lv_obj_t* val = lv_label_create(row);
     lv_label_set_text(val, value);
-    lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(val, getThemeFonts()->font_input, 0);
 
     // Make focusable
@@ -218,7 +218,7 @@ lv_obj_t* createValueSlider(lv_obj_t* parent, const char* label, int min, int ma
     // Value display - use theme font
     lv_obj_t* val = lv_label_create(header);
     lv_label_set_text_fmt(val, "%d", current);
-    lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(val, getThemeFonts()->font_subtitle, 0);
 
     // Slider
@@ -331,7 +331,7 @@ lv_obj_t* createStatsCard(lv_obj_t* parent, const char* title, const char** labe
 
         lv_obj_t* val = lv_label_create(row);
         lv_label_set_text(val, values[i]);
-        lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_PRIMARY, 0);
     }
 
     return card;
@@ -381,7 +381,7 @@ lv_obj_t* createStatusBar(lv_obj_t* parent) {
         lv_obj_set_style_text_color(battery_icon, LV_COLOR_SUCCESS, 0);
     } else if (batteryPercent > 40) {
         lv_label_set_text(battery_icon, LV_SYMBOL_BATTERY_2);
-        lv_obj_set_style_text_color(battery_icon, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_text_color(battery_icon, LV_COLOR_ACCENT_PRIMARY, 0);
     } else if (batteryPercent > 20) {
         lv_label_set_text(battery_icon, LV_SYMBOL_BATTERY_1);
         lv_obj_set_style_text_color(battery_icon, LV_COLOR_WARNING, 0);
@@ -432,7 +432,7 @@ lv_obj_t* createCompactStatusBar(lv_obj_t* parent) {
         lv_obj_set_style_text_color(batt_icon, LV_COLOR_SUCCESS, 0);
     } else if (batteryPercent > 40) {
         lv_label_set_text(batt_icon, LV_SYMBOL_BATTERY_2);
-        lv_obj_set_style_text_color(batt_icon, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_text_color(batt_icon, LV_COLOR_ACCENT_PRIMARY, 0);
     } else if (batteryPercent > 20) {
         lv_label_set_text(batt_icon, LV_SYMBOL_BATTERY_1);
         lv_obj_set_style_text_color(batt_icon, LV_COLOR_WARNING, 0);
@@ -623,7 +623,7 @@ lv_obj_t* createLoadingOverlay(const char* message) {
     lv_obj_t* spinner = lv_spinner_create(card, 1000, 60);
     lv_obj_set_size(spinner, 40, 40);
     lv_obj_align(spinner, LV_ALIGN_TOP_MID, 0, 10);
-    lv_obj_set_style_arc_color(spinner, LV_COLOR_ACCENT_CYAN, LV_PART_INDICATOR);
+    lv_obj_set_style_arc_color(spinner, LV_COLOR_ACCENT_PRIMARY, LV_PART_INDICATOR);
     lv_obj_set_style_arc_color(spinner, LV_COLOR_BG_LAYER2, LV_PART_MAIN);
 
     // Message label
@@ -657,7 +657,7 @@ lv_obj_t* createDecoderBox(lv_obj_t* parent, int width, int height) {
     lv_obj_t* text = lv_label_create(box);
     lv_label_set_text(text, "");
     lv_obj_set_style_text_font(text, getThemeFonts()->font_subtitle, 0);
-    lv_obj_set_style_text_color(text, LV_COLOR_ACCENT_GREEN, 0);
+    lv_obj_set_style_text_color(text, LV_COLOR_SUCCESS, 0);
     lv_label_set_long_mode(text, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_width(text, width - 20);
 
@@ -670,7 +670,7 @@ lv_obj_t* createDecoderBox(lv_obj_t* parent, int width, int height) {
 lv_obj_t* createWPMIndicator(lv_obj_t* parent, int initial_wpm) {
     lv_obj_t* container = lv_obj_create(parent);
     lv_obj_set_size(container, 100, 50);
-    lv_obj_set_style_bg_color(container, LV_COLOR_CARD_TEAL, 0);
+    lv_obj_set_style_bg_color(container, LV_COLOR_BG_CARD, 0);
     lv_obj_set_style_radius(container, 8, 0);
     lv_obj_set_style_pad_all(container, 5, 0);
 
@@ -683,7 +683,7 @@ lv_obj_t* createWPMIndicator(lv_obj_t* parent, int initial_wpm) {
     lv_obj_t* value = lv_label_create(container);
     lv_label_set_text_fmt(value, "%d", initial_wpm);
     lv_obj_set_style_text_font(value, getThemeFonts()->font_title, 0);
-    lv_obj_set_style_text_color(value, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(value, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(value, LV_ALIGN_BOTTOM_MID, 0, 0);
 
     return container;
@@ -709,7 +709,7 @@ lv_obj_t* createScoreDisplay(lv_obj_t* parent, const char* label, int initial_sc
 
     lv_obj_t* val = lv_label_create(container);
     lv_label_set_text_fmt(val, "%d", initial_score);
-    lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(val, getThemeFonts()->font_subtitle, 0);
 
     return container;

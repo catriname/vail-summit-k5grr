@@ -1,4 +1,4 @@
-/*
+﻿/*
  * VAIL SUMMIT - LVGL Theme
  * Dynamic theme system supporting multiple color schemes
  * Uses Theme Manager for color/font switching
@@ -18,12 +18,12 @@
 
 #define LV_COLOR_BG_DEEP        (getThemeColors()->bg_deep)
 #define LV_COLOR_BG_LAYER2      (getThemeColors()->bg_layer2)
-#define LV_COLOR_CARD_TEAL      (getThemeColors()->card_primary)
-#define LV_COLOR_CARD_BLUE      (getThemeColors()->card_secondary)
-#define LV_COLOR_CARD_CYAN      (getThemeColors()->card_focused)
-#define LV_COLOR_CARD_MINT      (getThemeColors()->card_border)
-#define LV_COLOR_ACCENT_CYAN    (getThemeColors()->accent_primary)
-#define LV_COLOR_ACCENT_BLUE    (getThemeColors()->accent_secondary)
+#define LV_COLOR_BG_CARD      (getThemeColors()->card_primary)
+#define LV_COLOR_BG_CARD_ALT      (getThemeColors()->card_secondary)
+#define LV_COLOR_BG_CARD_ACTIVE      (getThemeColors()->card_focused)
+#define LV_COLOR_BORDER_CARD      (getThemeColors()->card_border)
+#define LV_COLOR_ACCENT_PRIMARY    (getThemeColors()->accent_primary)
+#define LV_COLOR_ACCENT_SECONDARY    (getThemeColors()->accent_secondary)
 #define LV_COLOR_BORDER_ACCENT  (getThemeColors()->accent_glow)
 #define LV_COLOR_TEXT_PRIMARY   (getThemeColors()->text_primary)
 #define LV_COLOR_TEXT_SECONDARY (getThemeColors()->text_secondary)
@@ -34,7 +34,7 @@
 #define LV_COLOR_ERROR          (getThemeColors()->error)
 #define LV_COLOR_BORDER_SUBTLE  (getThemeColors()->border_subtle)
 #define LV_COLOR_BORDER_LIGHT   (getThemeColors()->border_light)
-#define LV_COLOR_ACCENT_GREEN   (getThemeColors()->success)
+#define LV_COLOR_SUCCESS   (getThemeColors()->success)
 #define LV_COLOR_ACCENT_MAGENTA lv_color_make(186, 85, 211)  // Purple/Magenta for Expert
 
 // ============================================

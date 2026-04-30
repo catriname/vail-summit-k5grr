@@ -1,4 +1,4 @@
-/*
+﻿/*
  * VAIL SUMMIT - Vail CW Course LVGL Screens
  * Module selection, lesson screens, and practice UI for CW School training
  */
@@ -197,7 +197,7 @@ lv_obj_t* createVailCourseLessonSelectScreen() {
     }
     lv_label_set_text(chars_label, charsText);
     lv_obj_set_style_text_font(chars_label, getThemeFonts()->font_body, 0);
-    lv_obj_set_style_text_color(chars_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(chars_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(chars_label, LV_ALIGN_RIGHT_MID, -15, 0);
 
     // Lesson list
@@ -918,7 +918,7 @@ void updateVailCourseLessonUI() {
                     char buf[8];
                     snprintf(buf, sizeof(buf), "%c", lessonState.currentChar);
                     lv_label_set_text(lessonState.main_label, buf);
-                    lv_obj_set_style_text_color(lessonState.main_label, LV_COLOR_ACCENT_CYAN, 0);
+                    lv_obj_set_style_text_color(lessonState.main_label, LV_COLOR_ACCENT_PRIMARY, 0);
                 }
                 break;
 
@@ -962,7 +962,7 @@ void updateVailCourseLessonUI() {
                             snprintf(inputDisplay, sizeof(inputDisplay), "%s_", lessonState.groupInputBuffer);
                         }
                         lv_label_set_text(lessonState.group_input_label, inputDisplay);
-                        lv_obj_set_style_text_color(lessonState.group_input_label, LV_COLOR_ACCENT_CYAN, 0);
+                        lv_obj_set_style_text_color(lessonState.group_input_label, LV_COLOR_ACCENT_PRIMARY, 0);
                         lv_obj_clear_flag(lessonState.group_input_label, LV_OBJ_FLAG_HIDDEN);
                     }
                 } else {
@@ -1119,7 +1119,7 @@ lv_obj_t* createVailCourseLessonScreen() {
     lessonState.phase_label = lv_label_create(header);
     lv_label_set_text(lessonState.phase_label, vailCoursePhaseNames[vailCourseProgress.currentPhase]);
     lv_obj_set_style_text_font(lessonState.phase_label, getThemeFonts()->font_body, 0);
-    lv_obj_set_style_text_color(lessonState.phase_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(lessonState.phase_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(lessonState.phase_label, LV_ALIGN_RIGHT_MID, -15, 0);
 
     // Main content area
@@ -1155,7 +1155,7 @@ lv_obj_t* createVailCourseLessonScreen() {
     lessonState.group_input_label = lv_label_create(content);
     lv_label_set_text(lessonState.group_input_label, "");
     lv_obj_set_style_text_font(lessonState.group_input_label, getThemeFonts()->font_input, 0);
-    lv_obj_set_style_text_color(lessonState.group_input_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(lessonState.group_input_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(lessonState.group_input_label, LV_ALIGN_CENTER, 0, 15);
     lv_obj_add_flag(lessonState.group_input_label, LV_OBJ_FLAG_HIDDEN);
 
