@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Memory Chain Game - Fresh Implementation
  *
  * A simple memory game where players listen to and repeat
@@ -258,7 +258,7 @@ lv_obj_t* createMemoryChainScreen() {
     // Score in title bar
     mc_score_label = lv_label_create(title_bar);
     lv_label_set_text(mc_score_label, "0");
-    lv_obj_set_style_text_color(mc_score_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(mc_score_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(mc_score_label, getThemeFonts()->font_subtitle, 0);
 
     // Level card
@@ -277,7 +277,7 @@ lv_obj_t* createMemoryChainScreen() {
     mc_level_label = lv_label_create(level_card);
     lv_label_set_text(mc_level_label, "1");
     lv_obj_set_style_text_font(mc_level_label, getThemeFonts()->font_large, 0);
-    lv_obj_set_style_text_color(mc_level_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(mc_level_label, LV_COLOR_ACCENT_PRIMARY, 0);
 
     // Lives card
     lv_obj_t* lives_card = lv_obj_create(screen);
@@ -321,7 +321,7 @@ lv_obj_t* createMemoryChainScreen() {
     mc_status_label = lv_label_create(status_card);
     lv_label_set_text(mc_status_label, "GET READY");
     lv_obj_set_style_text_font(mc_status_label, getThemeFonts()->font_title, 0);
-    lv_obj_set_style_text_color(mc_status_label, LV_COLOR_ACCENT_GREEN, 0);
+    lv_obj_set_style_text_color(mc_status_label, LV_COLOR_SUCCESS, 0);
 
     // Message label
     mc_message_label = lv_label_create(screen);

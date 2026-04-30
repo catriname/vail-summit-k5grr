@@ -101,7 +101,7 @@ lv_obj_t* createMenuCard(lv_obj_t* parent, const char* icon, const char* title, 
     lv_obj_t* icon_label = lv_label_create(icon_circle);
     lv_label_set_text(icon_label, icon);
     lv_obj_set_style_text_font(icon_label, getThemeFonts()->font_title, 0);
-    lv_obj_set_style_text_color(icon_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(icon_label, LV_COLOR_TEXT_PRIMARY, 0);
     lv_obj_center(icon_label);
 
     // Title label
@@ -162,7 +162,7 @@ lv_obj_t* createSettingsRow(lv_obj_t* parent, const char* label, const char* val
     // Value (highlighted) - use theme font
     lv_obj_t* val = lv_label_create(row);
     lv_label_set_text(val, value);
-    lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(val, getThemeFonts()->font_input, 0);
 
     // Make focusable
@@ -218,7 +218,7 @@ lv_obj_t* createValueSlider(lv_obj_t* parent, const char* label, int min, int ma
     // Value display - use theme font
     lv_obj_t* val = lv_label_create(header);
     lv_label_set_text_fmt(val, "%d", current);
-    lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(val, getThemeFonts()->font_subtitle, 0);
 
     // Slider
@@ -331,7 +331,7 @@ lv_obj_t* createStatsCard(lv_obj_t* parent, const char* title, const char** labe
 
         lv_obj_t* val = lv_label_create(row);
         lv_label_set_text(val, values[i]);
-        lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_PRIMARY, 0);
     }
 
     return card;
@@ -381,7 +381,7 @@ lv_obj_t* createStatusBar(lv_obj_t* parent) {
         lv_obj_set_style_text_color(battery_icon, LV_COLOR_SUCCESS, 0);
     } else if (batteryPercent > 40) {
         lv_label_set_text(battery_icon, LV_SYMBOL_BATTERY_2);
-        lv_obj_set_style_text_color(battery_icon, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_text_color(battery_icon, LV_COLOR_ACCENT_PRIMARY, 0);
     } else if (batteryPercent > 20) {
         lv_label_set_text(battery_icon, LV_SYMBOL_BATTERY_1);
         lv_obj_set_style_text_color(battery_icon, LV_COLOR_WARNING, 0);
@@ -432,7 +432,7 @@ lv_obj_t* createCompactStatusBar(lv_obj_t* parent) {
         lv_obj_set_style_text_color(batt_icon, LV_COLOR_SUCCESS, 0);
     } else if (batteryPercent > 40) {
         lv_label_set_text(batt_icon, LV_SYMBOL_BATTERY_2);
-        lv_obj_set_style_text_color(batt_icon, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_text_color(batt_icon, LV_COLOR_ACCENT_PRIMARY, 0);
     } else if (batteryPercent > 20) {
         lv_label_set_text(batt_icon, LV_SYMBOL_BATTERY_1);
         lv_obj_set_style_text_color(batt_icon, LV_COLOR_WARNING, 0);
@@ -442,6 +442,43 @@ lv_obj_t* createCompactStatusBar(lv_obj_t* parent) {
     }
 
     return batt_icon;
+}
+
+/*
+ * Create a split title bar label: mainTitle in title font, " // subTitle" in subtitle font.
+ * Renders both on one visual line inside a transparent flex-row container.
+ * Returns the container object.
+ *
+ * Parameters:
+ *   parent    - Title bar object (must use manual/absolute layout, not flex)
+ *   mainTitle - Primary section name (e.g. "CW ACADEMY")
+ *   subTitle  - Secondary section name (e.g. "COPY PRACTICE")
+ */
+lv_obj_t* createSplitTitleLabel(lv_obj_t* parent, const char* mainTitle, const char* subTitle) {
+    lv_obj_t* ctn = lv_obj_create(parent);
+    lv_obj_set_size(ctn, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_style_bg_opa(ctn, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(ctn, 0, 0);
+    lv_obj_set_style_pad_all(ctn, 0, 0);
+    lv_obj_set_layout(ctn, LV_LAYOUT_FLEX);
+    lv_obj_set_flex_flow(ctn, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(ctn, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER);
+    lv_obj_clear_flag(ctn, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_align(ctn, LV_ALIGN_LEFT_MID, 15, 0);
+
+    lv_obj_t* main_lbl = lv_label_create(ctn);
+    lv_label_set_text(main_lbl, mainTitle);
+    lv_obj_add_style(main_lbl, getStyleLabelTitle(), 0);
+
+    lv_obj_t* sub_lbl = lv_label_create(ctn);
+    char sub_text[80];
+    snprintf(sub_text, sizeof(sub_text), " // %s", subTitle);
+    for (char* p = sub_text + 4; *p; p++) *p = toupper((unsigned char)*p);
+    lv_label_set_text(sub_lbl, sub_text);
+    lv_obj_set_style_text_font(sub_lbl, getThemeFonts()->font_input, 0);
+    lv_obj_set_style_text_color(sub_lbl, LV_COLOR_TEXT_SECONDARY, 0);
+
+    return ctn;
 }
 
 // ============================================
@@ -623,7 +660,7 @@ lv_obj_t* createLoadingOverlay(const char* message) {
     lv_obj_t* spinner = lv_spinner_create(card, 1000, 60);
     lv_obj_set_size(spinner, 40, 40);
     lv_obj_align(spinner, LV_ALIGN_TOP_MID, 0, 10);
-    lv_obj_set_style_arc_color(spinner, LV_COLOR_ACCENT_CYAN, LV_PART_INDICATOR);
+    lv_obj_set_style_arc_color(spinner, LV_COLOR_ACCENT_PRIMARY, LV_PART_INDICATOR);
     lv_obj_set_style_arc_color(spinner, LV_COLOR_BG_LAYER2, LV_PART_MAIN);
 
     // Message label
@@ -657,7 +694,7 @@ lv_obj_t* createDecoderBox(lv_obj_t* parent, int width, int height) {
     lv_obj_t* text = lv_label_create(box);
     lv_label_set_text(text, "");
     lv_obj_set_style_text_font(text, getThemeFonts()->font_subtitle, 0);
-    lv_obj_set_style_text_color(text, LV_COLOR_ACCENT_GREEN, 0);
+    lv_obj_set_style_text_color(text, LV_COLOR_SUCCESS, 0);
     lv_label_set_long_mode(text, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_width(text, width - 20);
 
@@ -670,7 +707,7 @@ lv_obj_t* createDecoderBox(lv_obj_t* parent, int width, int height) {
 lv_obj_t* createWPMIndicator(lv_obj_t* parent, int initial_wpm) {
     lv_obj_t* container = lv_obj_create(parent);
     lv_obj_set_size(container, 100, 50);
-    lv_obj_set_style_bg_color(container, LV_COLOR_CARD_TEAL, 0);
+    lv_obj_set_style_bg_color(container, LV_COLOR_BG_CARD, 0);
     lv_obj_set_style_radius(container, 8, 0);
     lv_obj_set_style_pad_all(container, 5, 0);
 
@@ -683,7 +720,7 @@ lv_obj_t* createWPMIndicator(lv_obj_t* parent, int initial_wpm) {
     lv_obj_t* value = lv_label_create(container);
     lv_label_set_text_fmt(value, "%d", initial_wpm);
     lv_obj_set_style_text_font(value, getThemeFonts()->font_title, 0);
-    lv_obj_set_style_text_color(value, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(value, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(value, LV_ALIGN_BOTTOM_MID, 0, 0);
 
     return container;
@@ -709,7 +746,7 @@ lv_obj_t* createScoreDisplay(lv_obj_t* parent, const char* label, int initial_sc
 
     lv_obj_t* val = lv_label_create(container);
     lv_label_set_text_fmt(val, "%d", initial_score);
-    lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(val, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(val, getThemeFonts()->font_subtitle, 0);
 
     return container;

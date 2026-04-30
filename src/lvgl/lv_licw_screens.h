@@ -1,4 +1,4 @@
-/*
+﻿/*
  * VAIL SUMMIT - LVGL LICW Training Screens
  *
  * LVGL screens for the Long Island CW Club (LICW) training implementation.
@@ -1207,7 +1207,7 @@ lv_obj_t* createLICWSendPracticeScreen() {
     lv_obj_set_size(content, LV_PCT(90), 80);
     lv_obj_align(content, LV_ALIGN_TOP_MID, 0, 80);
     lv_obj_set_style_bg_color(content, LV_COLOR_BG_LAYER2, 0);
-    lv_obj_set_style_border_color(content, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(content, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_border_width(content, 2, 0);
     lv_obj_set_style_radius(content, 12, 0);
     lv_obj_set_style_pad_all(content, 15, 0);
@@ -2319,7 +2319,7 @@ lv_obj_t* createLICWCSFScreen() {
     lv_obj_t* title = lv_label_create(content);
     lv_label_set_text(title, "Character Sound Familiarity");
     lv_obj_set_style_text_font(title, getThemeFonts()->font_title, 0);
-    lv_obj_set_style_text_color(title, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(title, LV_COLOR_ACCENT_PRIMARY, 0);
 
     if (lesson->newChars && strlen(lesson->newChars) > 0) {
         lv_obj_t* chars = lv_label_create(content);
@@ -2385,7 +2385,7 @@ lv_obj_t* createLICWPlaceholderScreen(const char* mode_name) {
     lv_obj_t* title = lv_label_create(content);
     lv_label_set_text(title, mode_name);
     lv_obj_set_style_text_font(title, getThemeFonts()->font_title, 0);
-    lv_obj_set_style_text_color(title, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(title, LV_COLOR_ACCENT_PRIMARY, 0);
 
     lv_obj_t* coming = lv_label_create(content);
     lv_label_set_text(coming, "Coming Soon");
