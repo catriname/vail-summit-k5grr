@@ -227,10 +227,7 @@ lv_obj_t* createVailCourseLessonSelectScreen() {
         lv_obj_set_style_border_color(btn, LV_COLOR_WARNING, LV_STATE_FOCUSED);
         lv_obj_set_style_border_width(btn, 2, LV_STATE_FOCUSED);
 
-        if (completed) {
-            lv_obj_set_style_border_color(btn, LV_COLOR_BORDER_ACCENT, 0);
-            lv_obj_set_style_border_width(btn, 2, 0);
-        } else if (current) {
+        if (current) {
             lv_obj_add_style(btn, getStyleMenuCardFocused(), 0);
         }
 
