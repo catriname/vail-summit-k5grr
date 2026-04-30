@@ -1,4 +1,4 @@
-/*
+﻿/*
  * VAIL SUMMIT - LVGL Menu Screens
  * Replaces LovyanGFX menu rendering with LVGL
  */
@@ -215,7 +215,7 @@ lv_obj_t* createHeader(lv_obj_t* parent, const char* title) {
     mailbox_status_icon = lv_label_create(header);
     lv_label_set_text(mailbox_status_icon, LV_SYMBOL_ENVELOPE);
     lv_obj_set_style_text_font(mailbox_status_icon, &lv_font_montserrat_20, 0);
-    lv_obj_set_style_text_color(mailbox_status_icon, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(mailbox_status_icon, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(mailbox_status_icon, LV_ALIGN_RIGHT_MID, -85, 0);
     // Hide by default - only show when there are unread messages
     if (!isMailboxLinked() || !hasUnreadMailboxMessages()) {
@@ -253,7 +253,7 @@ lv_obj_t* createHeader(lv_obj_t* parent, const char* title) {
         lv_obj_set_style_text_color(batt_icon, LV_COLOR_SUCCESS, 0);
     } else if (batteryPercent > 40) {
         lv_label_set_text(batt_icon, LV_SYMBOL_BATTERY_2);
-        lv_obj_set_style_text_color(batt_icon, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_text_color(batt_icon, LV_COLOR_ACCENT_PRIMARY, 0);
     } else if (batteryPercent > 20) {
         lv_label_set_text(batt_icon, LV_SYMBOL_BATTERY_1);
         lv_obj_set_style_text_color(batt_icon, LV_COLOR_WARNING, 0);

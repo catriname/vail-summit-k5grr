@@ -1,4 +1,4 @@
-#ifndef LV_MORSE_NOTES_SCREENS_H
+﻿#ifndef LV_MORSE_NOTES_SCREENS_H
 #define LV_MORSE_NOTES_SCREENS_H
 
 #include "lv_screen_manager.h"
@@ -282,7 +282,7 @@ lv_obj_t* createMorseNotesLibraryScreen() {
             lv_obj_t* item = lv_btn_create(list);
             lv_obj_set_size(item, 440, 70);
             lv_obj_set_style_bg_color(item, LV_COLOR_BG_LAYER2, 0);
-            lv_obj_set_style_bg_color(item, LV_COLOR_CARD_CYAN, LV_STATE_FOCUSED);
+            lv_obj_set_style_bg_color(item, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
             lv_obj_set_style_radius(item, 8, 0);
 
             // Store metadata ID
@@ -297,7 +297,7 @@ lv_obj_t* createMorseNotesLibraryScreen() {
             lv_obj_t* icon = lv_label_create(item);
             lv_label_set_text(icon, LV_SYMBOL_AUDIO);
             lv_obj_set_style_text_font(icon, getThemeFonts()->font_large, 0);
-            lv_obj_set_style_text_color(icon, LV_COLOR_ACCENT_CYAN, 0);
+            lv_obj_set_style_text_color(icon, LV_COLOR_ACCENT_PRIMARY, 0);
 
             // Text column
             lv_obj_t* col = lv_obj_create(item);
@@ -624,7 +624,7 @@ static void mnShowSaveDialog() {
     lv_obj_center(mnSaveDialog);
     lv_obj_set_style_bg_color(mnSaveDialog, LV_COLOR_BG_LAYER2, 0);
     lv_obj_set_style_border_width(mnSaveDialog, 2, 0);
-    lv_obj_set_style_border_color(mnSaveDialog, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(mnSaveDialog, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_clear_flag(mnSaveDialog, LV_OBJ_FLAG_SCROLLABLE);
 
     // Prompt
@@ -833,7 +833,7 @@ lv_obj_t* createMorseNotesRecordScreen() {
              cwSpeed, cwTone, mnRecKeyTypeNames[getCwKeyTypeAsInt()]);
     lv_obj_t* settings_lbl = lv_label_create(content);
     lv_label_set_text(settings_lbl, settingsInfo);
-    lv_obj_set_style_text_color(settings_lbl, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(settings_lbl, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(settings_lbl, getThemeFonts()->font_small, 0);
 
     // Instructions
@@ -1307,9 +1307,9 @@ static const int mnSettingsKeyTypeCount = 4;
 static void mnSettingsUpdateFocus() {
     if (mnSettingsSpeedRow) {
         if (mnSettingsFocus == 0) {
-            lv_obj_set_style_bg_color(mnSettingsSpeedRow, LV_COLOR_CARD_TEAL, 0);
+            lv_obj_set_style_bg_color(mnSettingsSpeedRow, LV_COLOR_BG_CARD, 0);
             lv_obj_set_style_bg_opa(mnSettingsSpeedRow, LV_OPA_COVER, 0);
-            lv_obj_set_style_border_color(mnSettingsSpeedRow, LV_COLOR_ACCENT_CYAN, 0);
+            lv_obj_set_style_border_color(mnSettingsSpeedRow, LV_COLOR_ACCENT_PRIMARY, 0);
             lv_obj_set_style_border_width(mnSettingsSpeedRow, 2, 0);
         } else {
             lv_obj_set_style_bg_opa(mnSettingsSpeedRow, LV_OPA_TRANSP, 0);
@@ -1325,9 +1325,9 @@ static void mnSettingsUpdateFocus() {
     }
     if (mnSettingsToneRow) {
         if (mnSettingsFocus == 1) {
-            lv_obj_set_style_bg_color(mnSettingsToneRow, LV_COLOR_CARD_TEAL, 0);
+            lv_obj_set_style_bg_color(mnSettingsToneRow, LV_COLOR_BG_CARD, 0);
             lv_obj_set_style_bg_opa(mnSettingsToneRow, LV_OPA_COVER, 0);
-            lv_obj_set_style_border_color(mnSettingsToneRow, LV_COLOR_ACCENT_CYAN, 0);
+            lv_obj_set_style_border_color(mnSettingsToneRow, LV_COLOR_ACCENT_PRIMARY, 0);
             lv_obj_set_style_border_width(mnSettingsToneRow, 2, 0);
         } else {
             lv_obj_set_style_bg_opa(mnSettingsToneRow, LV_OPA_TRANSP, 0);
@@ -1343,9 +1343,9 @@ static void mnSettingsUpdateFocus() {
     }
     if (mnSettingsKeyTypeRow) {
         if (mnSettingsFocus == 2) {
-            lv_obj_set_style_bg_color(mnSettingsKeyTypeRow, LV_COLOR_CARD_TEAL, 0);
+            lv_obj_set_style_bg_color(mnSettingsKeyTypeRow, LV_COLOR_BG_CARD, 0);
             lv_obj_set_style_bg_opa(mnSettingsKeyTypeRow, LV_OPA_COVER, 0);
-            lv_obj_set_style_border_color(mnSettingsKeyTypeRow, LV_COLOR_ACCENT_CYAN, 0);
+            lv_obj_set_style_border_color(mnSettingsKeyTypeRow, LV_COLOR_ACCENT_PRIMARY, 0);
             lv_obj_set_style_border_width(mnSettingsKeyTypeRow, 2, 0);
         } else {
             lv_obj_set_style_bg_opa(mnSettingsKeyTypeRow, LV_OPA_TRANSP, 0);
@@ -1354,7 +1354,7 @@ static void mnSettingsUpdateFocus() {
     }
     if (mnSettingsKeyTypeValue) {
         lv_obj_set_style_text_color(mnSettingsKeyTypeValue,
-            mnSettingsFocus == 2 ? LV_COLOR_ACCENT_CYAN : LV_COLOR_TEXT_SECONDARY, 0);
+            mnSettingsFocus == 2 ? LV_COLOR_ACCENT_PRIMARY : LV_COLOR_TEXT_SECONDARY, 0);
     }
 }
 
@@ -1553,7 +1553,7 @@ lv_obj_t* createMorseNotesSettingsScreen() {
 
     mnSettingsSpeedValue = lv_label_create(speed_header);
     lv_label_set_text_fmt(mnSettingsSpeedValue, "%d WPM", cwSpeed);
-    lv_obj_set_style_text_color(mnSettingsSpeedValue, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(mnSettingsSpeedValue, LV_COLOR_ACCENT_PRIMARY, 0);
 
     mnSettingsSpeedSlider = lv_slider_create(mnSettingsSpeedRow);
     lv_obj_set_width(mnSettingsSpeedSlider, lv_pct(100));
@@ -1590,7 +1590,7 @@ lv_obj_t* createMorseNotesSettingsScreen() {
 
     mnSettingsToneValue = lv_label_create(tone_header);
     lv_label_set_text_fmt(mnSettingsToneValue, "%d Hz", cwTone);
-    lv_obj_set_style_text_color(mnSettingsToneValue, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(mnSettingsToneValue, LV_COLOR_ACCENT_PRIMARY, 0);
 
     mnSettingsToneSlider = lv_slider_create(mnSettingsToneRow);
     lv_obj_set_width(mnSettingsToneSlider, lv_pct(100));
@@ -1617,7 +1617,7 @@ lv_obj_t* createMorseNotesSettingsScreen() {
 
     mnSettingsKeyTypeValue = lv_label_create(mnSettingsKeyTypeRow);
     lv_label_set_text_fmt(mnSettingsKeyTypeValue, "< %s >", mnSettingsKeyTypeNames[getCwKeyTypeAsInt()]);
-    lv_obj_set_style_text_color(mnSettingsKeyTypeValue, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(mnSettingsKeyTypeValue, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(mnSettingsKeyTypeValue, getThemeFonts()->font_subtitle, 0);
 
     // Set initial focus styling

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * VAIL SUMMIT - LVGL WiFi Configuration Screen
  * Full on-device WiFi setup with network scanning, password entry, and AP mode
  */
@@ -212,12 +212,12 @@ lv_obj_t* createNetworkListItem(lv_obj_t* parent, int index, bool isSaved) {
 
     // Style
     lv_obj_set_style_bg_color(item, LV_COLOR_BG_LAYER2, 0);
-    lv_obj_set_style_bg_color(item, LV_COLOR_CARD_TEAL, LV_STATE_FOCUSED);
+    lv_obj_set_style_bg_color(item, LV_COLOR_BG_CARD, LV_STATE_FOCUSED);
     lv_obj_set_style_bg_opa(item, LV_OPA_COVER, 0);
     lv_obj_set_style_radius(item, 6, 0);
     lv_obj_set_style_border_width(item, 1, 0);
     lv_obj_set_style_border_color(item, LV_COLOR_BORDER_SUBTLE, 0);
-    lv_obj_set_style_border_color(item, LV_COLOR_ACCENT_CYAN, LV_STATE_FOCUSED);
+    lv_obj_set_style_border_color(item, LV_COLOR_ACCENT_PRIMARY, LV_STATE_FOCUSED);
     lv_obj_set_style_pad_all(item, 8, 0);
 
     // Signal bars
@@ -613,7 +613,7 @@ void createCurrentConnectionView(lv_obj_t* parent) {
     String ssid = WiFi.SSID();
     if (ssid.length() > 20) ssid = ssid.substring(0, 17) + "...";
     lv_label_set_text(ssid_val, ssid.c_str());
-    lv_obj_set_style_text_color(ssid_val, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(ssid_val, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(ssid_val, getThemeFonts()->font_input, 0);
     lv_obj_align(ssid_val, LV_ALIGN_RIGHT_MID, 0, 0);
 
@@ -632,7 +632,7 @@ void createCurrentConnectionView(lv_obj_t* parent) {
 
     lv_obj_t* ip_val = lv_label_create(ip_row);
     lv_label_set_text(ip_val, WiFi.localIP().toString().c_str());
-    lv_obj_set_style_text_color(ip_val, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(ip_val, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(ip_val, getThemeFonts()->font_input, 0);
     lv_obj_align(ip_val, LV_ALIGN_RIGHT_MID, 0, 0);
 
@@ -671,7 +671,7 @@ void createScanningView(lv_obj_t* parent) {
     // Scanning message
     lv_obj_t* label = lv_label_create(parent);
     lv_label_set_text(label, "Scanning for networks...");
-    lv_obj_set_style_text_color(label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(label, getThemeFonts()->font_subtitle, 0);
     lv_obj_center(label);
 
@@ -844,7 +844,7 @@ void createConnectedView(lv_obj_t* parent) {
     char ip_text[32];
     snprintf(ip_text, sizeof(ip_text), "IP: %s", WiFi.localIP().toString().c_str());
     lv_label_set_text(ip, ip_text);
-    lv_obj_set_style_text_color(ip, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(ip, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(ip, getThemeFonts()->font_body, 0);
     lv_obj_align(ip, LV_ALIGN_CENTER, 0, 50);
 }
@@ -900,7 +900,7 @@ void createAPModeView(lv_obj_t* parent) {
 
     lv_obj_t* ssid_val = lv_label_create(card);
     lv_label_set_text(ssid_val, WiFi.softAPSSID().c_str());
-    lv_obj_set_style_text_color(ssid_val, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(ssid_val, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(ssid_val, getThemeFonts()->font_input, 0);
 
     // Password
@@ -910,7 +910,7 @@ void createAPModeView(lv_obj_t* parent) {
 
     lv_obj_t* pw_val = lv_label_create(card);
     lv_label_set_text(pw_val, apPassword);
-    lv_obj_set_style_text_color(pw_val, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(pw_val, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(pw_val, getThemeFonts()->font_input, 0);
 
     // Instructions

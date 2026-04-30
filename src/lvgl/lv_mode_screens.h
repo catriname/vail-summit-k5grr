@@ -1,4 +1,4 @@
-/*
+﻿/*
  * VAIL SUMMIT - LVGL Mode Screens
  * Covers Radio, Vail Repeater, QSO Logger, Bluetooth, and other modes
  */
@@ -102,7 +102,7 @@ void updateRadioActionBarFocus() {
         case 2: focused = radio_btn_memories; break;
     }
     if (focused) {
-        lv_obj_set_style_border_color(focused, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_border_color(focused, LV_COLOR_ACCENT_PRIMARY, 0);
         lv_obj_set_style_border_width(focused, 2, 0);
     }
 }
@@ -172,7 +172,7 @@ void updateRadioMemoriesDisplay() {
             } else {
                 snprintf(buf, sizeof(buf), "%d. %s", slot + 1, cwMemories[slot].label);
                 lv_obj_set_style_text_color(memory_labels[i],
-                    isSelected ? LV_COLOR_TEXT_PRIMARY : LV_COLOR_ACCENT_CYAN, 0);
+                    isSelected ? LV_COLOR_TEXT_PRIMARY : LV_COLOR_ACCENT_PRIMARY, 0);
             }
             lv_label_set_text(memory_labels[i], buf);
         }
@@ -212,7 +212,7 @@ void createRadioSettingsOverlay() {
     lv_obj_center(radio_overlay);
     lv_obj_set_style_bg_color(radio_overlay, LV_COLOR_BG_DEEP, 0);
     lv_obj_set_style_bg_opa(radio_overlay, LV_OPA_COVER, 0);
-    lv_obj_set_style_border_color(radio_overlay, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(radio_overlay, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_border_width(radio_overlay, 2, 0);
     lv_obj_set_style_radius(radio_overlay, 12, 0);
     lv_obj_set_style_pad_all(radio_overlay, 15, 0);
@@ -221,7 +221,7 @@ void createRadioSettingsOverlay() {
     // Title
     lv_obj_t* title = lv_label_create(radio_overlay);
     lv_label_set_text(title, "KEYER SETTINGS");
-    lv_obj_set_style_text_color(title, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(title, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(title, getThemeFonts()->font_subtitle, 0);
     lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 0);
 
@@ -243,7 +243,7 @@ void createRadioSettingsOverlay() {
 
     settings_val_wpm = lv_label_create(settings_row_wpm);
     lv_label_set_text_fmt(settings_val_wpm, "%d", cwSpeed);
-    lv_obj_set_style_text_color(settings_val_wpm, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(settings_val_wpm, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(settings_val_wpm, getThemeFonts()->font_input, 0);
     lv_obj_align(settings_val_wpm, LV_ALIGN_RIGHT_MID, 0, 0);
 
@@ -265,7 +265,7 @@ void createRadioSettingsOverlay() {
 
     settings_val_keytype = lv_label_create(settings_row_keytype);
     lv_label_set_text(settings_val_keytype, getKeyTypeString(cwKeyType));
-    lv_obj_set_style_text_color(settings_val_keytype, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(settings_val_keytype, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(settings_val_keytype, getThemeFonts()->font_input, 0);
     lv_obj_align(settings_val_keytype, LV_ALIGN_RIGHT_MID, 0, 0);
 
@@ -287,7 +287,7 @@ void createRadioSettingsOverlay() {
 
     settings_val_tone = lv_label_create(settings_row_tone);
     lv_label_set_text_fmt(settings_val_tone, "%d Hz", cwTone);
-    lv_obj_set_style_text_color(settings_val_tone, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(settings_val_tone, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(settings_val_tone, getThemeFonts()->font_input, 0);
     lv_obj_align(settings_val_tone, LV_ALIGN_RIGHT_MID, 0, 0);
 
@@ -312,7 +312,7 @@ void createRadioMemoriesOverlay() {
     lv_obj_center(radio_overlay);
     lv_obj_set_style_bg_color(radio_overlay, LV_COLOR_BG_DEEP, 0);
     lv_obj_set_style_bg_opa(radio_overlay, LV_OPA_COVER, 0);
-    lv_obj_set_style_border_color(radio_overlay, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(radio_overlay, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_border_width(radio_overlay, 2, 0);
     lv_obj_set_style_radius(radio_overlay, 12, 0);
     lv_obj_set_style_pad_all(radio_overlay, 15, 0);
@@ -321,7 +321,7 @@ void createRadioMemoriesOverlay() {
     // Title
     lv_obj_t* title = lv_label_create(radio_overlay);
     lv_label_set_text(title, "CW MEMORIES");
-    lv_obj_set_style_text_color(title, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(title, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(title, getThemeFonts()->font_subtitle, 0);
     lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 0);
 
@@ -592,7 +592,7 @@ lv_obj_t* createRadioOutputScreen() {
     radio_mode_label = lv_label_create(mode_card);
     lv_label_set_text(radio_mode_label, radioMode == RADIO_MODE_SUMMIT_KEYER ? "Summit Keyer" : "Radio Keyer");
     lv_obj_set_style_text_font(radio_mode_label, getThemeFonts()->font_title, 0);
-    lv_obj_set_style_text_color(radio_mode_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(radio_mode_label, LV_COLOR_ACCENT_PRIMARY, 0);
 
     // Settings display row - WPM, Key Type, Tone
     lv_obj_t* settings_card = lv_obj_create(screen);
@@ -613,7 +613,7 @@ lv_obj_t* createRadioOutputScreen() {
 
     radio_wpm_label = lv_label_create(wpm_container);
     lv_label_set_text_fmt(radio_wpm_label, "%d WPM", cwSpeed);
-    lv_obj_set_style_text_color(radio_wpm_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(radio_wpm_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(radio_wpm_label, getThemeFonts()->font_body, 0);
 
     // Key Type display
@@ -626,7 +626,7 @@ lv_obj_t* createRadioOutputScreen() {
 
     radio_keytype_label = lv_label_create(keytype_container);
     lv_label_set_text(radio_keytype_label, getKeyTypeString(cwKeyType));
-    lv_obj_set_style_text_color(radio_keytype_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(radio_keytype_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(radio_keytype_label, getThemeFonts()->font_body, 0);
 
     // Tone display
@@ -639,7 +639,7 @@ lv_obj_t* createRadioOutputScreen() {
 
     radio_tone_label = lv_label_create(tone_container);
     lv_label_set_text_fmt(radio_tone_label, "%d Hz", cwTone);
-    lv_obj_set_style_text_color(radio_tone_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(radio_tone_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(radio_tone_label, getThemeFonts()->font_body, 0);
 
     // Status text
@@ -663,9 +663,9 @@ lv_obj_t* createRadioOutputScreen() {
     // Mode button
     radio_btn_mode = lv_obj_create(action_bar);
     lv_obj_set_size(radio_btn_mode, 120, 40);
-    lv_obj_set_style_bg_color(radio_btn_mode, LV_COLOR_CARD_TEAL, 0);
+    lv_obj_set_style_bg_color(radio_btn_mode, LV_COLOR_BG_CARD, 0);
     lv_obj_set_style_radius(radio_btn_mode, 8, 0);
-    lv_obj_set_style_border_color(radio_btn_mode, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(radio_btn_mode, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_border_width(radio_btn_mode, 2, 0);
     lv_obj_clear_flag(radio_btn_mode, LV_OBJ_FLAG_SCROLLABLE);
 
@@ -678,7 +678,7 @@ lv_obj_t* createRadioOutputScreen() {
     // Settings button
     radio_btn_settings = lv_obj_create(action_bar);
     lv_obj_set_size(radio_btn_settings, 120, 40);
-    lv_obj_set_style_bg_color(radio_btn_settings, LV_COLOR_CARD_TEAL, 0);
+    lv_obj_set_style_bg_color(radio_btn_settings, LV_COLOR_BG_CARD, 0);
     lv_obj_set_style_radius(radio_btn_settings, 8, 0);
     lv_obj_set_style_border_color(radio_btn_settings, LV_COLOR_BORDER_SUBTLE, 0);
     lv_obj_set_style_border_width(radio_btn_settings, 1, 0);
@@ -693,7 +693,7 @@ lv_obj_t* createRadioOutputScreen() {
     // Memories button
     radio_btn_memories = lv_obj_create(action_bar);
     lv_obj_set_size(radio_btn_memories, 120, 40);
-    lv_obj_set_style_bg_color(radio_btn_memories, LV_COLOR_CARD_TEAL, 0);
+    lv_obj_set_style_bg_color(radio_btn_memories, LV_COLOR_BG_CARD, 0);
     lv_obj_set_style_radius(radio_btn_memories, 8, 0);
     lv_obj_set_style_border_color(radio_btn_memories, LV_COLOR_BORDER_SUBTLE, 0);
     lv_obj_set_style_border_width(radio_btn_memories, 1, 0);
@@ -841,7 +841,7 @@ void updateCWMemoriesDisplay() {
             lv_obj_set_style_bg_color(cwmem_rows[i],
                 isSelected ? getThemeColors()->card_secondary : LV_COLOR_BG_LAYER2, 0);
             lv_obj_set_style_border_color(cwmem_rows[i],
-                isSelected ? LV_COLOR_ACCENT_CYAN : LV_COLOR_BORDER_SUBTLE, 0);
+                isSelected ? LV_COLOR_ACCENT_PRIMARY : LV_COLOR_BORDER_SUBTLE, 0);
             lv_obj_set_style_border_width(cwmem_rows[i], isSelected ? 2 : 1, 0);
         }
 
@@ -854,7 +854,7 @@ void updateCWMemoriesDisplay() {
             } else {
                 snprintf(buf, sizeof(buf), "%d.  %s", slot + 1, cwMemories[slot].label);
                 lv_obj_set_style_text_color(cwmem_labels[i],
-                    isSelected ? LV_COLOR_TEXT_PRIMARY : LV_COLOR_ACCENT_CYAN, 0);
+                    isSelected ? LV_COLOR_TEXT_PRIMARY : LV_COLOR_ACCENT_PRIMARY, 0);
             }
             lv_label_set_text(cwmem_labels[i], buf);
         }
@@ -893,7 +893,7 @@ void createCWMemContextMenu() {
     lv_obj_center(cwmem_overlay);
     lv_obj_set_style_bg_color(cwmem_overlay, LV_COLOR_BG_DEEP, 0);
     lv_obj_set_style_bg_opa(cwmem_overlay, LV_OPA_COVER, 0);
-    lv_obj_set_style_border_color(cwmem_overlay, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(cwmem_overlay, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_border_width(cwmem_overlay, 2, 0);
     lv_obj_set_style_radius(cwmem_overlay, 12, 0);
     lv_obj_set_style_pad_all(cwmem_overlay, 15, 0);
@@ -906,7 +906,7 @@ void createCWMemContextMenu() {
     } else {
         lv_label_set_text_fmt(title, "SLOT %d", cwmem_selection + 1);
     }
-    lv_obj_set_style_text_color(title, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(title, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(title, getThemeFonts()->font_subtitle, 0);
     lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 0);
 
@@ -979,7 +979,7 @@ void updateCWMemContextDisplay() {
     lv_obj_center(cwmem_overlay);
     lv_obj_set_style_bg_color(cwmem_overlay, LV_COLOR_BG_DEEP, 0);
     lv_obj_set_style_bg_opa(cwmem_overlay, LV_OPA_COVER, 0);
-    lv_obj_set_style_border_color(cwmem_overlay, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(cwmem_overlay, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_border_width(cwmem_overlay, 2, 0);
     lv_obj_set_style_radius(cwmem_overlay, 12, 0);
     lv_obj_set_style_pad_all(cwmem_overlay, 15, 0);
@@ -991,7 +991,7 @@ void updateCWMemContextDisplay() {
     } else {
         lv_label_set_text_fmt(title, "SLOT %d", cwmem_selection + 1);
     }
-    lv_obj_set_style_text_color(title, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(title, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(title, getThemeFonts()->font_subtitle, 0);
     lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 0);
 
@@ -1045,7 +1045,7 @@ void createCWMemEditOverlay() {
     lv_obj_center(cwmem_overlay);
     lv_obj_set_style_bg_color(cwmem_overlay, LV_COLOR_BG_DEEP, 0);
     lv_obj_set_style_bg_opa(cwmem_overlay, LV_OPA_COVER, 0);
-    lv_obj_set_style_border_color(cwmem_overlay, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(cwmem_overlay, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_border_width(cwmem_overlay, 2, 0);
     lv_obj_set_style_radius(cwmem_overlay, 12, 0);
     lv_obj_set_style_pad_all(cwmem_overlay, 15, 0);
@@ -1055,7 +1055,7 @@ void createCWMemEditOverlay() {
     cwmem_edit_title = lv_label_create(cwmem_overlay);
     bool isNew = cwMemories[cwmem_selection].isEmpty;
     lv_label_set_text(cwmem_edit_title, isNew ? "CREATE PRESET" : "EDIT PRESET");
-    lv_obj_set_style_text_color(cwmem_edit_title, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(cwmem_edit_title, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(cwmem_edit_title, getThemeFonts()->font_subtitle, 0);
     lv_obj_align(cwmem_edit_title, LV_ALIGN_TOP_MID, 0, 0);
 
@@ -1074,7 +1074,7 @@ void createCWMemEditOverlay() {
     lv_textarea_set_max_length(cwmem_edit_textarea, 15);
     lv_textarea_set_text(cwmem_edit_textarea, cwmem_edit_label);
     lv_obj_set_style_bg_color(cwmem_edit_textarea, LV_COLOR_BG_LAYER2, 0);
-    lv_obj_set_style_border_color(cwmem_edit_textarea, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(cwmem_edit_textarea, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_border_width(cwmem_edit_textarea, 1, 0);
     lv_obj_set_style_text_color(cwmem_edit_textarea, LV_COLOR_TEXT_PRIMARY, 0);
     lv_obj_set_style_text_font(cwmem_edit_textarea, getThemeFonts()->font_input, 0);
@@ -1714,7 +1714,7 @@ static void showVailSettingsModal(int type) {
         lv_obj_set_size(vail_settings_modal, 280, 140);
         lv_obj_center(vail_settings_modal);
         lv_obj_set_style_bg_color(vail_settings_modal, LV_COLOR_BG_LAYER2, 0);
-        lv_obj_set_style_border_color(vail_settings_modal, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_border_color(vail_settings_modal, LV_COLOR_ACCENT_PRIMARY, 0);
         lv_obj_set_style_border_width(vail_settings_modal, 2, 0);
         lv_obj_set_style_radius(vail_settings_modal, 8, 0);
         lv_obj_set_style_pad_all(vail_settings_modal, 15, 0);
@@ -1729,7 +1729,7 @@ static void showVailSettingsModal(int type) {
         // Value
         vail_settings_value_label = lv_label_create(vail_settings_modal);
         lv_obj_set_style_text_font(vail_settings_value_label, getThemeFonts()->font_title, 0);
-        lv_obj_set_style_text_color(vail_settings_value_label, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_text_color(vail_settings_value_label, LV_COLOR_ACCENT_PRIMARY, 0);
         lv_obj_align(vail_settings_value_label, LV_ALIGN_CENTER, 0, 0);
 
         // Help text
@@ -2136,7 +2136,7 @@ static void showVailRoomOverlay() {
     lv_obj_set_size(vail_room_overlay, 360, 220);
     lv_obj_center(vail_room_overlay);
     lv_obj_set_style_bg_color(vail_room_overlay, LV_COLOR_BG_LAYER2, 0);
-    lv_obj_set_style_border_color(vail_room_overlay, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(vail_room_overlay, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_border_width(vail_room_overlay, 2, 0);
     lv_obj_set_style_radius(vail_room_overlay, 8, 0);
     lv_obj_set_style_pad_all(vail_room_overlay, 10, 0);
@@ -2205,7 +2205,7 @@ static void updateVailRoomList() {
         lv_label_set_text(item, item_text);
         lv_obj_set_style_text_font(item, getThemeFonts()->font_body, 0);
         if (i == (size_t)vail_room_selection) {
-            lv_obj_set_style_text_color(item, LV_COLOR_ACCENT_CYAN, 0);
+            lv_obj_set_style_text_color(item, LV_COLOR_ACCENT_PRIMARY, 0);
         } else {
             lv_obj_set_style_text_color(item, LV_COLOR_TEXT_PRIMARY, 0);
         }
@@ -2219,7 +2219,7 @@ static void updateVailRoomList() {
     lv_label_set_text(custom_item, custom_text);
     lv_obj_set_style_text_font(custom_item, getThemeFonts()->font_body, 0);
     if (vail_room_selection == (int)activeRooms.size()) {
-        lv_obj_set_style_text_color(custom_item, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_text_color(custom_item, LV_COLOR_ACCENT_PRIMARY, 0);
     } else {
         lv_obj_set_style_text_color(custom_item, LV_COLOR_TEXT_SECONDARY, 0);
     }
@@ -2242,7 +2242,7 @@ static void showVailChatInputOverlay() {
     lv_obj_set_size(vail_chat_input_overlay, 400, 140);
     lv_obj_center(vail_chat_input_overlay);
     lv_obj_set_style_bg_color(vail_chat_input_overlay, LV_COLOR_BG_LAYER2, 0);
-    lv_obj_set_style_border_color(vail_chat_input_overlay, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(vail_chat_input_overlay, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_border_width(vail_chat_input_overlay, 2, 0);
     lv_obj_set_style_radius(vail_chat_input_overlay, 8, 0);
     lv_obj_set_style_pad_all(vail_chat_input_overlay, 15, 0);
@@ -2297,7 +2297,7 @@ static void showVailUserListOverlay() {
     lv_obj_set_size(vail_user_list_overlay, 320, 200);
     lv_obj_center(vail_user_list_overlay);
     lv_obj_set_style_bg_color(vail_user_list_overlay, LV_COLOR_BG_LAYER2, 0);
-    lv_obj_set_style_border_color(vail_user_list_overlay, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(vail_user_list_overlay, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_border_width(vail_user_list_overlay, 2, 0);
     lv_obj_set_style_radius(vail_user_list_overlay, 8, 0);
     lv_obj_set_style_pad_all(vail_user_list_overlay, 10, 0);
@@ -2414,7 +2414,7 @@ static void showVailCallsignRequiredOverlay() {
     lv_obj_t* instr = lv_label_create(vail_callsign_overlay);
     lv_label_set_text(instr, "Go to: Settings > General > Callsign");
     lv_obj_set_style_text_font(instr, getThemeFonts()->font_body, 0);
-    lv_obj_set_style_text_color(instr, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(instr, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(instr, LV_ALIGN_TOP_MID, 0, 95);
 
     // Footer help text
@@ -2524,7 +2524,7 @@ lv_obj_t* createVailRepeaterScreen() {
 
     vail_room_label = lv_label_create(left_info);
     lv_label_set_text(vail_room_label, "General");
-    lv_obj_set_style_text_color(vail_room_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(vail_room_label, LV_COLOR_ACCENT_PRIMARY, 0);
 
     vail_users_label = lv_label_create(left_info);
     lv_label_set_text(vail_users_label, "(0)");
@@ -2547,7 +2547,7 @@ lv_obj_t* createVailRepeaterScreen() {
 
     vail_callsign_label = lv_label_create(right_info);
     lv_label_set_text(vail_callsign_label, vailCallsign.c_str());
-    lv_obj_set_style_text_color(vail_callsign_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(vail_callsign_label, LV_COLOR_ACCENT_PRIMARY, 0);
 
     // Large key indicator (centered, pulsing when keying)
     vail_key_indicator = lv_obj_create(vail_info_panel);
@@ -2597,7 +2597,7 @@ lv_obj_t* createVailRepeaterScreen() {
     char speed_str[16];
     snprintf(speed_str, sizeof(speed_str), "%d WPM", cwSpeed);
     lv_label_set_text(vail_speed_label, speed_str);
-    lv_obj_set_style_text_color(vail_speed_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(vail_speed_label, LV_COLOR_ACCENT_PRIMARY, 0);
 
     // Tone setting
     lv_obj_t* tone_col = lv_obj_create(vail_settings_row);
@@ -2619,7 +2619,7 @@ lv_obj_t* createVailRepeaterScreen() {
     char tone_str[16];
     snprintf(tone_str, sizeof(tone_str), "%d Hz", cwTone);
     lv_label_set_text(vail_tone_label, tone_str);
-    lv_obj_set_style_text_color(vail_tone_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(vail_tone_label, LV_COLOR_ACCENT_PRIMARY, 0);
 
     // Key type setting
     lv_obj_t* key_col = lv_obj_create(vail_settings_row);
@@ -2639,7 +2639,7 @@ lv_obj_t* createVailRepeaterScreen() {
 
     vail_keytype_label = lv_label_create(key_col);
     lv_label_set_text(vail_keytype_label, vail_keytype_names[cwKeyType]);
-    lv_obj_set_style_text_color(vail_keytype_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(vail_keytype_label, LV_COLOR_ACCENT_PRIMARY, 0);
 
     // ============================================
     // CHAT PANEL (View 1) - Initially hidden
@@ -2683,7 +2683,7 @@ lv_obj_t* createVailRepeaterScreen() {
     lv_obj_set_size(vail_chat_input_box, SCREEN_WIDTH - 20, 36);
     lv_obj_align(vail_chat_input_box, LV_ALIGN_BOTTOM_MID, 0, -2);
     lv_obj_set_style_bg_color(vail_chat_input_box, LV_COLOR_BG_LAYER2, 0);
-    lv_obj_set_style_border_color(vail_chat_input_box, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(vail_chat_input_box, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_border_width(vail_chat_input_box, 1, 0);
     lv_obj_set_style_radius(vail_chat_input_box, 4, 0);
     lv_obj_clear_flag(vail_chat_input_box, LV_OBJ_FLAG_SCROLLABLE);
@@ -2716,7 +2716,7 @@ lv_obj_t* createVailRepeaterScreen() {
     char wpm_str[16];
     snprintf(wpm_str, sizeof(wpm_str), "WPM: %d", cwSpeed);
     lv_label_set_text(vail_wpm_label, wpm_str);
-    lv_obj_set_style_text_color(vail_wpm_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(vail_wpm_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(vail_wpm_label, getThemeFonts()->font_small, 0);
 
     // Invisible focus container for keyboard input
@@ -2749,7 +2749,7 @@ lv_obj_t* createVailRepeaterScreen() {
     lv_obj_t* spinner = lv_spinner_create(vail_loading_overlay, 1000, 60);
     lv_obj_set_size(spinner, 50, 50);
     lv_obj_align(spinner, LV_ALIGN_CENTER, 0, -20);
-    lv_obj_set_style_arc_color(spinner, LV_COLOR_ACCENT_CYAN, LV_PART_INDICATOR);
+    lv_obj_set_style_arc_color(spinner, LV_COLOR_ACCENT_PRIMARY, LV_PART_INDICATOR);
     lv_obj_set_style_arc_color(spinner, LV_COLOR_BG_LAYER2, LV_PART_MAIN);
 
     lv_obj_t* loading_label = lv_label_create(vail_loading_overlay);
@@ -3251,9 +3251,9 @@ lv_obj_t* createQSOLogEntryScreen() {
     lv_obj_set_style_border_color(qso_mode_row, LV_COLOR_BORDER_SUBTLE, 0);
     lv_obj_set_style_pad_all(qso_mode_row, 5, 0);
     // Add focus styling - cyan border and slight glow when focused
-    lv_obj_set_style_border_color(qso_mode_row, LV_COLOR_ACCENT_CYAN, LV_STATE_FOCUSED);
+    lv_obj_set_style_border_color(qso_mode_row, LV_COLOR_ACCENT_PRIMARY, LV_STATE_FOCUSED);
     lv_obj_set_style_border_width(qso_mode_row, 2, LV_STATE_FOCUSED);
-    lv_obj_set_style_outline_color(qso_mode_row, LV_COLOR_ACCENT_CYAN, LV_STATE_FOCUSED);
+    lv_obj_set_style_outline_color(qso_mode_row, LV_COLOR_ACCENT_PRIMARY, LV_STATE_FOCUSED);
     lv_obj_set_style_outline_width(qso_mode_row, 2, LV_STATE_FOCUSED);
     lv_obj_set_style_outline_opa(qso_mode_row, LV_OPA_50, LV_STATE_FOCUSED);
     lv_obj_clear_flag(qso_mode_row, LV_OBJ_FLAG_SCROLLABLE);
@@ -3600,7 +3600,7 @@ lv_obj_t* createQSOSaveConfirmScreen(const QSO& savedQso) {
     lv_obj_set_style_bg_color(content, LV_COLOR_BG_LAYER2, 0);
     lv_obj_set_style_bg_opa(content, LV_OPA_COVER, 0);
     lv_obj_set_style_border_width(content, 1, 0);
-    lv_obj_set_style_border_color(content, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_border_color(content, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_radius(content, 8, 0);
     lv_obj_set_style_pad_all(content, 15, 0);
     lv_obj_clear_flag(content, LV_OBJ_FLAG_SCROLLABLE);
@@ -3610,7 +3610,7 @@ lv_obj_t* createQSOSaveConfirmScreen(const QSO& savedQso) {
     lv_obj_t* callsign_label = lv_label_create(content);
     lv_label_set_text_fmt(callsign_label, "%s", qso_saved_qso.callsign);
     lv_obj_set_style_text_font(callsign_label, getThemeFonts()->font_large, 0);
-    lv_obj_set_style_text_color(callsign_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(callsign_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(callsign_label, LV_ALIGN_TOP_MID, 0, 0);
 
     // Frequency and Band
@@ -3756,12 +3756,12 @@ lv_obj_t* createBTHIDScreen() {
     lv_obj_t* bt_icon = lv_label_create(name_row);
     lv_label_set_text(bt_icon, LV_SYMBOL_BLUETOOTH);
     lv_obj_set_style_text_font(bt_icon, getThemeFonts()->font_large, 0);  // Theme font includes symbols
-    lv_obj_set_style_text_color(bt_icon, LV_COLOR_ACCENT_BLUE, 0);
+    lv_obj_set_style_text_color(bt_icon, LV_COLOR_ACCENT_SECONDARY, 0);
     lv_obj_align(bt_icon, LV_ALIGN_LEFT_MID, 100, 0);
 
     bt_hid_device_name_label = lv_label_create(name_row);
     lv_label_set_text(bt_hid_device_name_label, "VAIL-SUMMIT-XXXXXX");
-    lv_obj_set_style_text_color(bt_hid_device_name_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(bt_hid_device_name_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(bt_hid_device_name_label, getThemeFonts()->font_subtitle, 0);
     lv_obj_align(bt_hid_device_name_label, LV_ALIGN_LEFT_MID, 140, 0);
 
@@ -3789,7 +3789,7 @@ lv_obj_t* createBTHIDScreen() {
 
     bt_hid_keyer_label = lv_label_create(keyer_row);
     lv_label_set_text(bt_hid_keyer_label, "< Passthrough >");
-    lv_obj_set_style_text_color(bt_hid_keyer_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(bt_hid_keyer_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_set_style_text_font(bt_hid_keyer_label, getThemeFonts()->font_subtitle, 0);
     lv_obj_align(bt_hid_keyer_label, LV_ALIGN_LEFT_MID, 145, 0);
 
@@ -3976,11 +3976,11 @@ extern bool lookupPOTAPark(const char* reference, POTAPark& park);
 static void updateLoggerSettingsFocus() {
     // Mode row styling
     if (logger_settings_focus == 0) {
-        lv_obj_set_style_bg_color(logger_mode_row, LV_COLOR_CARD_TEAL, 0);
+        lv_obj_set_style_bg_color(logger_mode_row, LV_COLOR_BG_CARD, 0);
         lv_obj_set_style_bg_opa(logger_mode_row, LV_OPA_COVER, 0);
-        lv_obj_set_style_border_color(logger_mode_row, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_border_color(logger_mode_row, LV_COLOR_ACCENT_PRIMARY, 0);
         lv_obj_set_style_border_width(logger_mode_row, 2, 0);
-        lv_obj_set_style_text_color(logger_mode_value, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_text_color(logger_mode_value, LV_COLOR_ACCENT_PRIMARY, 0);
     } else {
         lv_obj_set_style_bg_color(logger_mode_row, LV_COLOR_BG_LAYER2, 0);
         lv_obj_set_style_bg_opa(logger_mode_row, LV_OPA_COVER, 0);
@@ -3991,7 +3991,7 @@ static void updateLoggerSettingsFocus() {
 
     // Location row styling
     if (logger_settings_focus == 1) {
-        lv_obj_set_style_border_color(logger_location_row, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_border_color(logger_location_row, LV_COLOR_ACCENT_PRIMARY, 0);
         lv_obj_set_style_border_width(logger_location_row, 2, 0);
     } else {
         lv_obj_set_style_border_color(logger_location_row, LV_COLOR_BORDER_SUBTLE, 0);
@@ -4001,7 +4001,7 @@ static void updateLoggerSettingsFocus() {
     // QTH row styling (only visible in Grid mode)
     if (logger_qth_row != NULL && logger_location_mode == 0) {
         if (logger_settings_focus == 2) {
-            lv_obj_set_style_border_color(logger_qth_row, LV_COLOR_ACCENT_CYAN, 0);
+            lv_obj_set_style_border_color(logger_qth_row, LV_COLOR_ACCENT_PRIMARY, 0);
             lv_obj_set_style_border_width(logger_qth_row, 2, 0);
         } else {
             lv_obj_set_style_border_color(logger_qth_row, LV_COLOR_BORDER_SUBTLE, 0);
@@ -4496,7 +4496,7 @@ lv_obj_t* createQSOStatisticsScreen() {
 
         qso_stats_total_label = lv_label_create(total_card);
         lv_label_set_text_fmt(qso_stats_total_label, "%d", stats.totalQSOs);
-        lv_obj_set_style_text_color(qso_stats_total_label, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_text_color(qso_stats_total_label, LV_COLOR_ACCENT_PRIMARY, 0);
         lv_obj_set_style_text_font(qso_stats_total_label, getThemeFonts()->font_large, 0);
         lv_obj_align(qso_stats_total_label, LV_ALIGN_BOTTOM_LEFT, 0, 0);
 
@@ -4582,7 +4582,7 @@ lv_obj_t* createQSOStatisticsScreen() {
 
             lv_obj_t* bands_title = lv_label_create(bands_section);
             lv_label_set_text(bands_title, "Bands");
-            lv_obj_set_style_text_color(bands_title, LV_COLOR_ACCENT_CYAN, 0);
+            lv_obj_set_style_text_color(bands_title, LV_COLOR_ACCENT_PRIMARY, 0);
             lv_obj_set_style_text_font(bands_title, getThemeFonts()->font_body, 0);
 
             for (int i = 0; i < stats.bandCount && i < 10; i++) {
@@ -4604,7 +4604,7 @@ lv_obj_t* createQSOStatisticsScreen() {
 
                 lv_obj_t* bar = lv_obj_create(band_row);
                 lv_obj_set_size(bar, barWidth, 12);
-                lv_obj_set_style_bg_color(bar, LV_COLOR_ACCENT_CYAN, 0);
+                lv_obj_set_style_bg_color(bar, LV_COLOR_ACCENT_PRIMARY, 0);
                 lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
                 lv_obj_set_style_radius(bar, 2, 0);
                 lv_obj_set_style_border_width(bar, 0, 0);
@@ -4739,8 +4739,8 @@ static void updateViewLogsRowStyles() {
         if (view_logs_rows[i] == NULL) continue;
 
         if (qsoIndex == view_logs_selected) {
-            lv_obj_set_style_bg_color(view_logs_rows[i], LV_COLOR_CARD_TEAL, 0);
-            lv_obj_set_style_border_color(view_logs_rows[i], LV_COLOR_ACCENT_CYAN, 0);
+            lv_obj_set_style_bg_color(view_logs_rows[i], LV_COLOR_BG_CARD, 0);
+            lv_obj_set_style_border_color(view_logs_rows[i], LV_COLOR_ACCENT_PRIMARY, 0);
             lv_obj_set_style_border_width(view_logs_rows[i], 2, 0);
         } else {
             lv_obj_set_style_bg_color(view_logs_rows[i], LV_COLOR_BG_LAYER2, 0);
@@ -5044,7 +5044,7 @@ static void rebuildViewLogsList() {
         lv_obj_t* call_label = lv_label_create(row);
         lv_label_set_text(call_label, qso.callsign);
         lv_obj_set_style_text_font(call_label, getThemeFonts()->font_subtitle, 0);
-        lv_obj_set_style_text_color(call_label, LV_COLOR_ACCENT_CYAN, 0);
+        lv_obj_set_style_text_color(call_label, LV_COLOR_ACCENT_PRIMARY, 0);
         lv_obj_align(call_label, LV_ALIGN_LEFT_MID, 70, 0);
 
         // Band/Mode (right)

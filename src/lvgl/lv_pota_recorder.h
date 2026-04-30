@@ -1,4 +1,4 @@
-/*
+﻿/*
  * VAIL SUMMIT - POTA Recorder Screens
  * Setup and recording screens for POTA QSO logging
  */
@@ -255,8 +255,8 @@ lv_obj_t* createPOTARecorderSetupScreen() {
     // Start button
     pota_rec_start_btn = lv_btn_create(content);
     lv_obj_set_size(pota_rec_start_btn, 180, 50);
-    lv_obj_set_style_bg_color(pota_rec_start_btn, LV_COLOR_ACCENT_GREEN, 0);
-    lv_obj_set_style_bg_color(pota_rec_start_btn, LV_COLOR_ACCENT_CYAN, LV_STATE_FOCUSED);
+    lv_obj_set_style_bg_color(pota_rec_start_btn, LV_COLOR_SUCCESS, 0);
+    lv_obj_set_style_bg_color(pota_rec_start_btn, LV_COLOR_ACCENT_PRIMARY, LV_STATE_FOCUSED);
 
     lv_obj_t* btn_label = lv_label_create(pota_rec_start_btn);
     lv_label_set_text(btn_label, LV_SYMBOL_PLAY " Start Recording");
@@ -379,11 +379,11 @@ static void pota_rec_update_cb(lv_timer_t* timer) {
             // Color based on state
             POTAQSOState state = parser->getState();
             if (state == POTAQSOState::QSO_COMPLETE) {
-                lv_obj_set_style_text_color(pota_rec_state_label, LV_COLOR_ACCENT_GREEN, 0);
+                lv_obj_set_style_text_color(pota_rec_state_label, LV_COLOR_SUCCESS, 0);
             } else if (state == POTAQSOState::IDLE) {
                 lv_obj_set_style_text_color(pota_rec_state_label, LV_COLOR_TEXT_TERTIARY, 0);
             } else {
-                lv_obj_set_style_text_color(pota_rec_state_label, LV_COLOR_ACCENT_CYAN, 0);
+                lv_obj_set_style_text_color(pota_rec_state_label, LV_COLOR_ACCENT_PRIMARY, 0);
             }
         }
     }
@@ -466,7 +466,7 @@ lv_obj_t* createPOTARecorderScreen() {
     pota_rec_qth_label = lv_label_create(qso_panel);
     lv_label_set_text(pota_rec_qth_label, "QTH: ---");
     lv_obj_set_style_text_font(pota_rec_qth_label, &lv_font_montserrat_14, 0);
-    lv_obj_set_style_text_color(pota_rec_qth_label, LV_COLOR_ACCENT_CYAN, 0);
+    lv_obj_set_style_text_color(pota_rec_qth_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(pota_rec_qth_label, LV_ALIGN_RIGHT_MID, -15, 20);
 
     // Parser state
