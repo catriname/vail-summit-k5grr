@@ -520,7 +520,7 @@ lv_obj_t* createCWSchoolMenuScreen() {
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t* title = lv_label_create(header);
-    lv_label_set_text(title, "Vail CW School");
+    lv_label_set_text(title, "CW School");
     lv_obj_set_style_text_font(title, getThemeFonts()->font_input, 0);
     lv_obj_set_style_text_color(title, LV_COLOR_TEXT_PRIMARY, 0);
     lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
