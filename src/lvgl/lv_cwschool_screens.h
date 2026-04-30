@@ -511,10 +511,7 @@ lv_obj_t* createCWSchoolMenuScreen() {
     lv_obj_set_style_border_width(header, 0, 0);
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t* title = lv_label_create(header);
-    lv_label_set_text(title, "VAIL CW SCHOOL");
-    lv_obj_add_style(title, getStyleLabelTitle(), 0);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
+    createSplitTitleLabel(header, "VAIL CW SCHOOL", "MENU");
 
     // Status indicator in header
     lv_obj_t* status_indicator = lv_label_create(header);

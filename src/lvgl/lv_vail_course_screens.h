@@ -68,7 +68,7 @@ lv_obj_t* createVailCourseModuleSelectScreen() {
     lv_obj_set_style_border_width(header, 0, 0);
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
-    createSplitTitleLabel(header, "VAIL COURSE", "MODULES");
+    createSplitTitleLabel(header, "VAIL CW SCHOOL", "MODULES");
 
     // Account status in header
     lv_obj_t* status = lv_label_create(header);
@@ -1203,7 +1203,7 @@ lv_obj_t* createVailCourseProgressScreen() {
     lv_obj_set_style_border_width(header, 0, 0);
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
-    createSplitTitleLabel(header, "VAIL COURSE", "PROGRESS");
+    createSplitTitleLabel(header, "VAIL CW SCHOOL", "PROGRESS");
 
     // Stats container
     lv_obj_t* stats = lv_obj_create(screen);
