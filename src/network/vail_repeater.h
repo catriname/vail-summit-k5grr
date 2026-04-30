@@ -117,6 +117,8 @@ static volatile unsigned long vailElementStartMillis = 0;
 static volatile bool vailElementActive = false;
 static volatile bool vailElementJustEnded = false;  // Flag for Core 1 to send network msg
 static volatile uint16_t vailElementDuration = 0;   // Duration of just-ended element
+static volatile bool vailTxKeyJustDown = false;      // Key-down event for TX decoder silence
+static volatile unsigned long vailTxKeyDownMs = 0;  // Time of that key-down
 
 // Receive state
 struct VailMessage {
@@ -785,6 +787,10 @@ void vailKeyerCallback(bool txOn, int element) {
     // Element starting - play sidetone directly (we're on Core 0)
     startToneInternal(cwTone);
 
+    // Signal Core 1 to feed the inter-element silence to the TX decoder
+    vailTxKeyDownMs = now;
+    vailTxKeyJustDown = true;
+
     // Track element start for duration calculation
     vailElementStartMillis = now;
     vailElementActive = true;
@@ -828,17 +834,22 @@ void processKeyerOutput() {
   unsigned long now = millis();
 
   // Check if keyer just finished an element (set by callback on Core 0)
+  // Key-down: feed inter-element silence to TX decoder (same as practice module)
+  if (vailTxKeyJustDown && vailTxDecoder) {
+    vailTxKeyJustDown = false;
+    if (vailTxLastElementEndMs > 0) {
+      float silence = -(float)(vailTxKeyDownMs - vailTxLastElementEndMs);
+      vailTxDecoder->addTiming(silence);
+    }
+  }
+
   if (vailElementJustEnded) {
     vailElementJustEnded = false;  // Clear flag
 
-    // Feed TX decoder (always active for chat compose)
+    // Feed tone duration to TX decoder on key-up
     if (vailTxDecoder) {
-      if (vailTxLastElementEndMs > 0) {
-        float silence = -(float)(now - vailTxLastElementEndMs);
-        vailTxDecoder->addTiming(silence);
-      }
       vailTxDecoder->addTiming((float)vailElementDuration);
-      vailTxLastElementEndMs = now;
+      vailTxLastElementEndMs = millis();
     }
 
     // Calculate server timestamp (must be done on Core 1)
@@ -861,8 +872,8 @@ void processKeyerOutput() {
       }
     }
 
-    // Send element to network (skip if listen-only)
-    if (!vailListenOnly) {
+    // Send element to network (skip if listen-only or composing a chat message)
+    if (!vailListenOnly && !vailChatMode) {
       sendVailMessage({vailElementDuration}, serverTs);
       vailTxStartTime = now;  // Reset idle timer
       if (!vailIsTransmitting) {

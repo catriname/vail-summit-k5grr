@@ -1616,6 +1616,7 @@ static void updateVailFooter();
 static void switchVailView(int view) {
     vail_current_view = view;
     vail_view_mode = (view == 2) ? 9 : view;
+    vailChatMode = (view == 1);
 
     if (vail_info_panel != NULL)     lv_obj_add_flag(vail_info_panel,     LV_OBJ_FLAG_HIDDEN);
     if (vail_chat_panel != NULL)     lv_obj_add_flag(vail_chat_panel,     LV_OBJ_FLAG_HIDDEN);
@@ -1695,9 +1696,20 @@ static void refreshVailSettingsFocus() {
 // Adjust the focused settings row by delta (+1 or -1)
 static void adjustVailSettingsRow(int delta) {
     switch (vail_settings_focus) {
-        case 0: cwSpeed = constrain(cwSpeed + delta, 5, 40); saveCWSettings(); break;
+        case 0:
+            cwSpeed = constrain(cwSpeed + delta, 5, 40);
+            if (vailKeyer) vailKeyer->setDitDuration(DIT_DURATION(cwSpeed));
+            saveCWSettings();
+            break;
         case 1: cwTone = constrain(cwTone + delta * 50, 400, 1200); saveCWSettings(); break;
-        case 2: cwKeyType = (KeyType)((cwKeyType + delta + 4) % 4); saveCWSettings(); break;
+        case 2:
+            cwKeyType = (KeyType)((cwKeyType + delta + 4) % 4);
+            vailKeyer = getKeyer(cwKeyType);
+            vailKeyer->reset();
+            vailKeyer->setDitDuration(DIT_DURATION(cwSpeed));
+            vailKeyer->setTxCallback(vailKeyerCallback);
+            saveCWSettings();
+            break;
         case 3:
             vailShowMorseRow = !vailShowMorseRow;
             saveVailSettings();
