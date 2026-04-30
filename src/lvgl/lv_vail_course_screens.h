@@ -1181,6 +1181,7 @@ lv_obj_t* createVailCourseLessonScreen() {
     lv_obj_add_flag(focus, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(focus, vail_course_lesson_key_handler, LV_EVENT_KEY, NULL);
     addNavigableWidget(focus);
+    focusWidget(focus);
 
     // Footer
     lessonState.footer_label = lv_label_create(screen);
