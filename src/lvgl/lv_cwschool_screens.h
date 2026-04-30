@@ -152,6 +152,17 @@ static void cwschool_link_key_handler(lv_event_t* e) {
  * Create device linking screen
  */
 lv_obj_t* createCWSchoolLinkScreen() {
+    // Already linked — redirect to account screen
+    if (isCWSchoolLinked()) {
+        lv_timer_create([](lv_timer_t* t) {
+            lv_timer_del(t);
+            onLVGLMenuSelect(MODE_CWSCHOOL_ACCOUNT);
+        }, 0, NULL);
+        lv_obj_t* screen = createScreen();
+        applyScreenStyle(screen);
+        return screen;
+    }
+
     // Check internet first
     if (getInternetStatus() != INET_CONNECTED) {
         // Show error screen
