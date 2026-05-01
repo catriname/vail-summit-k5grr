@@ -570,23 +570,72 @@ lv_obj_t* createConfirmDialog(const char* title, const char* message, lv_event_c
 // ============================================
 
 /*
- * Create a simple alert dialog with OK button that closes on Enter/click
- * Properly handles keyboard navigation and dismissal
+ * Create a modal alert dialog with OK button that closes on Enter/click.
+ *
+ * Modality is enforced by a fullscreen backdrop on lv_layer_top() that swallows
+ * every event landing outside the dialog, and by swapping the keypad indev onto
+ * a private group while the alert is open. This prevents clicks/keys from
+ * falling through to the screen below and prevents the underlying focus from
+ * drifting in response to the dismiss.
  *
  * Parameters:
- *   title - Dialog title
- *   message - Message text
+ *   title    - Dialog title
+ *   message  - Message text
  *   on_close - Optional callback when dialog is closed (can be NULL)
  */
+
+// Saved indev group so dismissal can restore the prior navigation context.
+static lv_group_t* s_alert_prev_group = NULL;
+static lv_group_t* s_alert_dialog_group = NULL;
+
+// Tear down: invoke on_close, restore the keypad group, delete the backdrop
+// (which removes the msgbox child along with it).
+static void closeAlertDialog(lv_obj_t* backdrop, lv_event_t* e) {
+    if (backdrop == NULL) return;
+
+    lv_obj_t* mbox = lv_obj_get_child(backdrop, 0);
+    lv_event_cb_t close_cb = (mbox != NULL)
+        ? (lv_event_cb_t)lv_obj_get_user_data(mbox)
+        : NULL;
+    if (close_cb != NULL) close_cb(e);
+
+    lv_indev_t* indev = getLVGLKeypad();
+    if (indev != NULL && s_alert_dialog_group != NULL) {
+        lv_indev_set_group(indev, s_alert_prev_group);
+        lv_group_del(s_alert_dialog_group);
+        s_alert_dialog_group = NULL;
+        s_alert_prev_group = NULL;
+    }
+
+    lv_obj_del(backdrop);
+}
+
 lv_obj_t* createAlertDialog(const char* title, const char* message, lv_event_cb_t on_close = NULL) {
-    lv_obj_t* mbox = lv_msgbox_create(NULL, title, message, NULL, false);
+    // Fullscreen backdrop absorbs every event that does not target the msgbox.
+    lv_obj_t* backdrop = lv_obj_create(lv_layer_top());
+    lv_obj_remove_style_all(backdrop);
+    lv_obj_set_size(backdrop, LV_HOR_RES, LV_VER_RES);
+    lv_obj_set_pos(backdrop, 0, 0);
+    lv_obj_clear_flag(backdrop, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(backdrop, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_style_bg_color(backdrop, lv_color_black(), 0);
+    lv_obj_set_style_bg_opa(backdrop, LV_OPA_50, 0);
+
+    // Stop every event whose target IS the backdrop. Events on the msgbox/OK
+    // button do not bubble by default, so they are unaffected.
+    lv_obj_add_event_cb(backdrop, [](lv_event_t* e) {
+        if (lv_event_get_target(e) != lv_event_get_current_target(e)) return;
+        lv_event_stop_processing(e);
+        lv_event_stop_bubbling(e);
+    }, LV_EVENT_ALL, NULL);
+
+    // Msgbox is a child of the backdrop so it draws above and dies with it.
+    lv_obj_t* mbox = lv_msgbox_create(backdrop, title, message, NULL, false);
     lv_obj_center(mbox);
     lv_obj_add_style(mbox, getStyleMsgbox(), 0);
 
-    // Store close callback in user data
     lv_obj_set_user_data(mbox, (void*)on_close);
 
-    // Footer: full-width flex-row container centered horizontally — sits below text in the msgbox column layout
     lv_obj_t* footer = lv_obj_create(mbox);
     lv_obj_remove_style_all(footer);
     lv_obj_set_size(footer, lv_pct(100), 60);
@@ -603,42 +652,51 @@ lv_obj_t* createAlertDialog(const char* title, const char* message, lv_event_cb_
     lv_obj_set_style_radius(btn, 8, 0);
     lv_obj_set_style_border_width(btn, 0, 0);
 
-    // btn is two levels deep (btn→footer→mbox), store mbox directly
-    lv_obj_set_user_data(btn, (void*)mbox);
+    // Button stores the backdrop so dismissal can find and delete it.
+    lv_obj_set_user_data(btn, (void*)backdrop);
 
     lv_obj_t* btn_label = lv_label_create(btn);
     lv_label_set_text(btn_label, "OK");
     lv_obj_set_style_text_color(btn_label, lv_color_black(), 0);
     lv_obj_center(btn_label);
 
-    // KEY handler: Enter or ESC closes
-    lv_obj_add_event_cb(btn, [](lv_event_t* e) {
-        uint32_t key = lv_event_get_key(e);
-        if (key == LV_KEY_ENTER || key == LV_KEY_ESC) {
-            lv_obj_t* b = lv_event_get_target(e);
-            lv_obj_t* mbox = (lv_obj_t*)lv_obj_get_user_data(b);
-            lv_event_cb_t close_cb = (lv_event_cb_t)lv_obj_get_user_data(mbox);
-            if (key == LV_KEY_ENTER && close_cb != NULL) close_cb(e);
-            lv_msgbox_close(mbox);
-        }
-    }, LV_EVENT_KEY, NULL);
-
+    // KEY handler: ANY key dismisses without invoking on_close (ESC-style).
+    // Also discard the rest of the in-flight press via lv_indev_wait_release()
+    // so the Enter release does not synthesize a CLICKED on the menu item that
+    // opened the alert, which would otherwise re-trigger it in a loop.
     lv_obj_add_event_cb(btn, [](lv_event_t* e) {
         lv_obj_t* b = lv_event_get_target(e);
-        lv_obj_t* mbox = (lv_obj_t*)lv_obj_get_user_data(b);
-        lv_event_cb_t close_cb = (lv_event_cb_t)lv_obj_get_user_data(mbox);
-        if (close_cb != NULL) close_cb(e);
-        lv_msgbox_close(mbox);
+        lv_obj_t* backdrop = (lv_obj_t*)lv_obj_get_user_data(b);
+        closeAlertDialog(backdrop, NULL);
+        lv_indev_t* indev = getLVGLKeypad();
+        if (indev != NULL) lv_indev_wait_release(indev);
+        lv_event_stop_processing(e);
+        lv_event_stop_bubbling(e);
+    }, LV_EVENT_KEY, NULL);
+
+    // CLICKED handler: ESC-style dismiss — never invokes on_close.
+    lv_obj_add_event_cb(btn, [](lv_event_t* e) {
+        lv_obj_t* b = lv_event_get_target(e);
+        lv_obj_t* backdrop = (lv_obj_t*)lv_obj_get_user_data(b);
+        closeAlertDialog(backdrop, NULL);
+        lv_indev_t* indev = getLVGLKeypad();
+        if (indev != NULL) lv_indev_wait_release(indev);
+        lv_event_stop_processing(e);
+        lv_event_stop_bubbling(e);
     }, LV_EVENT_CLICKED, NULL);
 
-    // Explicitly add to group and defer focus past the triggering keypress
-    lv_group_t* group = getLVGLInputGroup();
-    if (group) lv_group_add_obj(group, btn);
-    lv_timer_create([](lv_timer_t* t) {
-        lv_obj_t* b = (lv_obj_t*)t->user_data;
-        lv_group_focus_obj(b);
-        lv_timer_del(t);
-    }, 50, btn);
+    // Swap the keypad onto a private group containing only the OK button.
+    // Arrow keys can't move focus on the screen below, and Enter/ESC reach
+    // only this dialog. Restored in closeAlertDialog().
+    lv_indev_t* indev = getLVGLKeypad();
+    if (indev != NULL) {
+        s_alert_prev_group = getLVGLInputGroup();
+        s_alert_dialog_group = lv_group_create();
+        lv_group_set_wrap(s_alert_dialog_group, false);
+        lv_group_add_obj(s_alert_dialog_group, btn);
+        lv_indev_set_group(indev, s_alert_dialog_group);
+        lv_group_focus_obj(btn);
+    }
 
     return mbox;
 }
