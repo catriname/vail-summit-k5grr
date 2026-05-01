@@ -107,18 +107,12 @@ std::vector<uint16_t> vailTxDurations;
 std::deque<int64_t> recentTxTimestamps;
 const size_t MAX_TX_TIMESTAMPS = 20;
 
-// Core 0 keyer - runs in paddle callback from audio task
+// Keyer - runs in main loop on Core 1 (like practice mode)
 static StraightKeyer* vailKeyer = nullptr;
 static bool vailDitPressed = false;
 static bool vailDahPressed = false;
-
-// Element tracking for network transmission (set by keyer callback on Core 0)
-static volatile unsigned long vailElementStartMillis = 0;
-static volatile bool vailElementActive = false;
-static volatile bool vailElementJustEnded = false;  // Flag for Core 1 to send network msg
-static volatile uint16_t vailElementDuration = 0;   // Duration of just-ended element
-static volatile bool vailTxKeyJustDown = false;      // Key-down event for TX decoder silence
-static volatile unsigned long vailTxKeyDownMs = 0;  // Time of that key-down
+static unsigned long vailLastStateChangeTime = 0;
+static bool vailLastToneState = false;
 
 // Receive state
 struct VailMessage {
@@ -134,7 +128,7 @@ int64_t clockSkew = 0;  // Offset to convert millis() to server time
 int clockSkewSamples = 0;  // Number of clock skew samples received
 const float CLOCK_SKEW_ALPHA = 0.3f;  // Exponential moving average weight
 
-// TX morse compose state (updated on Core 1 via processKeyerOutput)
+// TX morse compose state
 String vailTxMorseSymbols = "";       // current char being keyed: ". - ." etc
 volatile bool vailTxDecodedReady = false;  // set when TX decoder emits a char
 char vailTxLastDecodedChar = 0;       // the decoded character
@@ -156,8 +150,6 @@ static esp_timer_handle_t vailRxTickTimer = nullptr;
 static esp_timer_handle_t vailTxTickTimer = nullptr;
 static volatile bool vailRxTickPending = false;
 static volatile bool vailTxTickPending = false;
-static unsigned long vailTxLastElementEndMs = 0;
-
 static void vailRxTickCallback(void*) { vailRxTickPending = true; }
 static void vailTxTickCallback(void*) { vailTxTickPending = true; }
 
@@ -166,7 +158,6 @@ static void vailTxOnDecoded(String morse, String text) {
         vailTxLastDecodedChar = text[i];
         vailTxDecodedReady = true;
     }
-    // Append character separator — keep history, don't clear
     vailTxMorseSymbols += " /";
 }
 
@@ -241,7 +232,6 @@ static void stopVailDecoders() {
     delete vailTxDecoder; vailTxDecoder = nullptr;
     vailRxTickPending = false;
     vailTxTickPending = false;
-    vailTxLastElementEndMs = 0;
 }
 
 // Playback state machine variables
@@ -291,8 +281,6 @@ std::vector<UserInfo> connectedUsers;
 // Forward declarations
 void startVailRepeater(LGFX &display);
 void vailKeyerCallback(bool txOn, int element);
-void vailPaddleCallback(bool ditPressed, bool dahPressed, unsigned long now);
-void processKeyerOutput();  // Process keyer output for network transmission (called from Core 1)
 void drawVailUI(LGFX &display);
 void drawChatUI(LGFX &display);
 void drawRoomSelectionUI(LGFX &display);
@@ -352,23 +340,16 @@ void startVailRepeater(LGFX &display) {
   rxQueue.clear();
   vailTxDurations.clear();
 
-  // Initialize keyer (runs via callback from Core 0 for precise timing)
+  // Initialize keyer (runs in main loop on Core 1, like practice mode)
   vailDitPressed = false;
   vailDahPressed = false;
+  vailLastStateChangeTime = 0;
+  vailLastToneState = false;
   int ditDuration = DIT_DURATION(cwSpeed);
   vailKeyer = getKeyer(cwKeyType);
   vailKeyer->reset();
   vailKeyer->setDitDuration(ditDuration);
   vailKeyer->setTxCallback(vailKeyerCallback);
-
-  // Register paddle callback to run keyer on Core 0
-  registerPaddleCallback(vailPaddleCallback);
-
-  // Reset element tracking
-  vailElementStartMillis = 0;
-  vailElementActive = false;
-  vailElementJustEnded = false;
-  vailElementDuration = 0;
 
   // Initialize chat mode
   vailChatMode = false;
@@ -485,19 +466,14 @@ void disconnectFromVail() {
   clockSkewSamples = 0;  // Reset clock sync on disconnect
   vailIsTransmitting = false;
 
-  // Unregister paddle callback and reset keyer
-  registerPaddleCallback(nullptr);
+  // Reset keyer state
   vailDitPressed = false;
   vailDahPressed = false;
+  vailLastStateChangeTime = 0;
+  vailLastToneState = false;
   if (vailKeyer) {
     vailKeyer->reset();
   }
-
-  // Reset element tracking
-  vailElementStartMillis = 0;
-  vailElementActive = false;
-  vailElementJustEnded = false;
-  vailElementDuration = 0;
 
   Serial.println("[Vail] Disconnected and state cleared");
 }
@@ -771,129 +747,62 @@ void sendVailMessage(std::vector<uint16_t> durations, int64_t timestamp) {
   webSocket.sendTXT(output);
 }
 
-// Keyer callback - called from Core 0 when element starts/stops
-// Handles audio directly (Core 0) and sets flags for Core 1 network transmission
+// Keyer callback - called from Core 1 main loop (like practice mode)
 void vailKeyerCallback(bool txOn, int element) {
   unsigned long now = millis();
 
-  if (vailListenOnly) {
-    // Listen-only: play sidetone locally but skip all transmission tracking
-    if (txOn) startToneInternal(cwTone);
-    else stopToneInternal();
-    return;
-  }
-
   if (txOn) {
-    // Element starting - play sidetone directly (we're on Core 0)
-    startToneInternal(cwTone);
+    startTone(cwTone);
 
-    // Signal Core 1 to feed the inter-element silence to the TX decoder
-    vailTxKeyDownMs = now;
-    vailTxKeyJustDown = true;
+    // Stop any playback in progress
+    if (isPlaying) {
+      requestStopTone();
+      isPlaying = false;
+      playbackToneFrequency = 0;
+    }
 
-    // Track element start for duration calculation
-    vailElementStartMillis = now;
-    vailElementActive = true;
+    // Feed inter-element silence to decoder
+    if (vailTxDecoder && vailLastStateChangeTime > 0 && vailLastToneState == false) {
+      float silenceDuration = now - vailLastStateChangeTime;
+      if (silenceDuration > 0) vailTxDecoder->addTiming(-silenceDuration);
+    }
+    vailLastStateChangeTime = now;
+    vailLastToneState = true;
   } else {
-    // Element ending - stop sidetone directly (we're on Core 0)
-    stopToneInternal();
+    stopTone();
 
-    // Calculate duration and set flag for Core 1 to send network message
-    if (vailElementActive && vailElementStartMillis > 0) {
-      vailElementDuration = (uint16_t)(now - vailElementStartMillis);
-      vailElementJustEnded = true;  // Signal Core 1 to send
-    }
+    if (vailLastToneState && vailLastStateChangeTime > 0) {
+      float toneDuration = now - vailLastStateChangeTime;
+      if (toneDuration > 0) {
+        // Feed to decoder
+        if (vailTxDecoder) vailTxDecoder->addTiming(toneDuration);
 
-    vailElementActive = false;
-    vailElementStartMillis = 0;
-  }
-}
+        // Live morse row (dot/dash per element)
+        float ditMs = 1200.0f / (float)cwSpeed;
+        if (vailTxMorseSymbols.length() > 0) vailTxMorseSymbols += " ";
+        vailTxMorseSymbols += (toneDuration <= ditMs * 2.0f) ? "." : "-";
+        if ((int)vailTxMorseSymbols.length() > 72) {
+          int slashPos = vailTxMorseSymbols.indexOf('/', 15);
+          if (slashPos >= 0 && slashPos + 3 < (int)vailTxMorseSymbols.length())
+            vailTxMorseSymbols = vailTxMorseSymbols.substring(slashPos + 2);
+          else
+            vailTxMorseSymbols = vailTxMorseSymbols.substring(vailTxMorseSymbols.length() - 50);
+        }
 
-// Paddle callback - called from Core 0 audio task every ~1ms
-// Runs keyer state machine with precise timing
-void vailPaddleCallback(bool ditPressed, bool dahPressed, unsigned long now) {
-  if (!vailKeyer) return;
-
-  // Feed paddle state changes to keyer
-  if (ditPressed != vailDitPressed) {
-    vailKeyer->key(PADDLE_DIT, ditPressed);
-    vailDitPressed = ditPressed;
-  }
-  if (dahPressed != vailDahPressed) {
-    vailKeyer->key(PADDLE_DAH, dahPressed);
-    vailDahPressed = dahPressed;
-  }
-
-  // Tick keyer state machine with precise timing
-  vailKeyer->tick(now);
-}
-
-// Process keyer output - called from Core 1 main loop
-// Checks for completed elements and sends network messages
-void processKeyerOutput() {
-  unsigned long now = millis();
-
-  // Check if keyer just finished an element (set by callback on Core 0)
-  // Key-down: feed inter-element silence to TX decoder (same as practice module)
-  if (vailTxKeyJustDown && vailTxDecoder) {
-    vailTxKeyJustDown = false;
-    if (vailTxLastElementEndMs > 0) {
-      float silence = -(float)(vailTxKeyDownMs - vailTxLastElementEndMs);
-      vailTxDecoder->addTiming(silence);
-    }
-  }
-
-  if (vailElementJustEnded) {
-    vailElementJustEnded = false;  // Clear flag
-
-    // Feed tone duration to TX decoder on key-up
-    if (vailTxDecoder) {
-      vailTxDecoder->addTiming((float)vailElementDuration);
-      vailTxLastElementEndMs = millis();
-    }
-
-    // Calculate server timestamp (must be done on Core 1)
-    int64_t serverTs = getCurrentTimestamp();
-
-    // Append dit or dah symbol for chat compose display
-    {
-      float ditMs = 1200.0f / (float)cwSpeed;
-      if (vailTxMorseSymbols.length() > 0) vailTxMorseSymbols += " ";
-      vailTxMorseSymbols += (vailElementDuration <= (uint16_t)(ditMs * 2.0f)) ? "." : "-";
-
-      // Trim from the left at a '/' boundary when history gets too long
-      if ((int)vailTxMorseSymbols.length() > 72) {
-        int slashPos = vailTxMorseSymbols.indexOf('/', 15);
-        if (slashPos >= 0 && slashPos + 3 < (int)vailTxMorseSymbols.length()) {
-          vailTxMorseSymbols = vailTxMorseSymbols.substring(slashPos + 2);
-        } else {
-          vailTxMorseSymbols = vailTxMorseSymbols.substring(vailTxMorseSymbols.length() - 50);
+        // Send to network
+        if (!vailListenOnly && !vailChatMode) {
+          int64_t serverTs = getCurrentTimestamp();
+          sendVailMessage({(uint16_t)toneDuration}, serverTs);
+          vailTxStartTime = now;
+          if (!vailIsTransmitting) {
+            vailIsTransmitting = true;
+            vailTxDurations.clear();
+          }
         }
       }
     }
-
-    // Send element to network (skip if listen-only or composing a chat message)
-    if (!vailListenOnly && !vailChatMode) {
-      sendVailMessage({vailElementDuration}, serverTs);
-      vailTxStartTime = now;  // Reset idle timer
-      if (!vailIsTransmitting) {
-        vailIsTransmitting = true;
-        vailTxDurations.clear();
-      }
-    }
-  }
-
-  // Stop any playback if transmitting (Core 1 manages playback state)
-  if (vailElementActive && isPlaying) {
-    requestStopTone();
-    isPlaying = false;
-    playbackToneFrequency = 0;
-  }
-
-  // Reset transmission state after 2 seconds of inactivity
-  bool keyerActive = (vailKeyer && vailKeyer->isTxActive());
-  if (vailIsTransmitting && !keyerActive && (now - vailTxStartTime > 2000)) {
-    vailIsTransmitting = false;
+    vailLastStateChangeTime = now;
+    vailLastToneState = false;
   }
 }
 
@@ -919,10 +828,26 @@ void updateVailRepeater(LGFX &display) {
     vailTxDecoder->tick();
   }
 
-  // Process keyer output for network transmission
-  // Keyer timing runs on Core 0 via paddle callback with precise 1ms resolution
-  // Audio is also handled directly on Core 0
-  processKeyerOutput();
+  // Paddle + keyer (like practice mode — Core 1, no flag relay)
+  if (vailKeyer) {
+    bool newDitPressed, newDahPressed;
+    getPaddleState(&newDitPressed, &newDahPressed);
+    if (newDitPressed != vailDitPressed) {
+      vailKeyer->key(PADDLE_DIT, newDitPressed);
+      vailDitPressed = newDitPressed;
+    }
+    if (newDahPressed != vailDahPressed) {
+      vailKeyer->key(PADDLE_DAH, newDahPressed);
+      vailDahPressed = newDahPressed;
+    }
+    vailKeyer->tick(millis());
+    if (vailKeyer->isTxActive()) continueTone(cwTone);
+
+    // Reset transmission state after 2 seconds of inactivity
+    if (vailIsTransmitting && !vailKeyer->isTxActive() && (millis() - vailTxStartTime > 2000)) {
+      vailIsTransmitting = false;
+    }
+  }
 
   // Playback received messages
   playbackMessages();
@@ -935,7 +860,7 @@ void updateVailRepeater(LGFX &display) {
 void playbackMessages() {
   // Don't play if transmitting - transmission has audio priority
   bool keyerActive = (vailKeyer && vailKeyer->isTxActive());
-  if (vailIsTransmitting || keyerActive || vailElementActive) {
+  if (vailIsTransmitting || keyerActive) {
     if (isPlaying) {
       // Stop playback if we started transmitting
       requestStopTone();  // Non-blocking - audio task handles stop
