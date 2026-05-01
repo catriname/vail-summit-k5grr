@@ -579,55 +579,66 @@ lv_obj_t* createConfirmDialog(const char* title, const char* message, lv_event_c
  *   on_close - Optional callback when dialog is closed (can be NULL)
  */
 lv_obj_t* createAlertDialog(const char* title, const char* message, lv_event_cb_t on_close = NULL) {
-    static const char* btns[] = {"OK", ""};
-
-    lv_obj_t* mbox = lv_msgbox_create(NULL, title, message, btns, false);
+    lv_obj_t* mbox = lv_msgbox_create(NULL, title, message, NULL, false);
     lv_obj_center(mbox);
     lv_obj_add_style(mbox, getStyleMsgbox(), 0);
 
     // Store close callback in user data
     lv_obj_set_user_data(mbox, (void*)on_close);
 
-    // Get button matrix
-    lv_obj_t* btns_obj = lv_msgbox_get_btns(mbox);
+    // Footer: full-width flex-row container centered horizontally — sits below text in the msgbox column layout
+    lv_obj_t* footer = lv_obj_create(mbox);
+    lv_obj_remove_style_all(footer);
+    lv_obj_set_size(footer, lv_pct(100), 60);
+    lv_obj_clear_flag(footer, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_flex_flow(footer, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(footer, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 
-    // Handle button click (VALUE_CHANGED fires when btnmatrix button is clicked)
-    lv_obj_add_event_cb(mbox, [](lv_event_t* e) {
-        lv_obj_t* obj = lv_event_get_current_target(e);
-        lv_event_cb_t close_cb = (lv_event_cb_t)lv_obj_get_user_data(obj);
-        if (close_cb != NULL) {
-            close_cb(e);
-        }
-        lv_msgbox_close(obj);
-    }, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_t* btn = lv_obj_create(footer);
+    lv_obj_set_size(btn, 120, 40);
+    lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_clear_flag(btn, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color(btn, LV_COLOR_ACCENT_PRIMARY, 0);
+    lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, 0);
+    lv_obj_set_style_radius(btn, 8, 0);
+    lv_obj_set_style_border_width(btn, 0, 0);
 
-    // Also handle KEY events on the button matrix for Enter key
-    lv_obj_add_event_cb(btns_obj, [](lv_event_t* e) {
+    // btn is two levels deep (btn→footer→mbox), store mbox directly
+    lv_obj_set_user_data(btn, (void*)mbox);
+
+    lv_obj_t* btn_label = lv_label_create(btn);
+    lv_label_set_text(btn_label, "OK");
+    lv_obj_set_style_text_color(btn_label, lv_color_black(), 0);
+    lv_obj_center(btn_label);
+
+    // KEY handler: Enter or ESC closes
+    lv_obj_add_event_cb(btn, [](lv_event_t* e) {
         uint32_t key = lv_event_get_key(e);
-        if (key == LV_KEY_ENTER) {
-            lv_obj_t* btnm = lv_event_get_target(e);
-            lv_obj_t* mbox = lv_obj_get_parent(btnm);
+        if (key == LV_KEY_ENTER || key == LV_KEY_ESC) {
+            lv_obj_t* b = lv_event_get_target(e);
+            lv_obj_t* mbox = (lv_obj_t*)lv_obj_get_user_data(b);
             lv_event_cb_t close_cb = (lv_event_cb_t)lv_obj_get_user_data(mbox);
-            if (close_cb != NULL) {
-                lv_event_send(mbox, LV_EVENT_VALUE_CHANGED, NULL);
-            }
-            lv_msgbox_close(mbox);
-        } else if (key == LV_KEY_ESC) {
-            lv_obj_t* btnm = lv_event_get_target(e);
-            lv_obj_t* mbox = lv_obj_get_parent(btnm);
+            if (key == LV_KEY_ENTER && close_cb != NULL) close_cb(e);
             lv_msgbox_close(mbox);
         }
     }, LV_EVENT_KEY, NULL);
 
-    // Add button matrix to input group so keyboard works on CardKB
-    // Note: Use lv_group_add_obj directly (not addNavigableWidget) because
-    // the dialog has its own ESC handler above — adding global_esc_handler
-    // would cause a double-action (close dialog AND navigate back)
+    lv_obj_add_event_cb(btn, [](lv_event_t* e) {
+        lv_obj_t* b = lv_event_get_target(e);
+        lv_obj_t* mbox = (lv_obj_t*)lv_obj_get_user_data(b);
+        lv_event_cb_t close_cb = (lv_event_cb_t)lv_obj_get_user_data(mbox);
+        if (close_cb != NULL) close_cb(e);
+        lv_msgbox_close(mbox);
+    }, LV_EVENT_CLICKED, NULL);
+
+    // Explicitly add to group and defer focus past the triggering keypress
     lv_group_t* group = getLVGLInputGroup();
-    if (group) {
-        lv_group_add_obj(group, btns_obj);
-    }
-    lv_group_focus_obj(btns_obj);
+    if (group) lv_group_add_obj(group, btn);
+    lv_timer_create([](lv_timer_t* t) {
+        lv_obj_t* b = (lv_obj_t*)t->user_data;
+        lv_group_focus_obj(b);
+        lv_timer_del(t);
+    }, 50, btn);
 
     return mbox;
 }
