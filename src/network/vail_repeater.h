@@ -130,8 +130,10 @@ const float CLOCK_SKEW_ALPHA = 0.3f;  // Exponential moving average weight
 
 // TX morse compose state
 String vailTxMorseSymbols = "";       // current char being keyed: ". - ." etc
-volatile bool vailTxDecodedReady = false;  // set when TX decoder emits a char
-char vailTxLastDecodedChar = 0;       // the decoded character
+// Queue of decoded chars awaiting consumption by the UI. Replaces the
+// previous single-char + bool pair, which lost characters when the decoder
+// emitted multiple chars (e.g. "X ") in one callback.
+String vailTxDecodedQueue = "";
 
 // Decoded character slots shared with LVGL update
 #define VAIL_DECODE_SLOTS 12
@@ -154,11 +156,24 @@ static void vailRxTickCallback(void*) { vailRxTickPending = true; }
 static void vailTxTickCallback(void*) { vailTxTickPending = true; }
 
 static void vailTxOnDecoded(String morse, String text) {
+    // Process every char the decoder emitted (could be "X ", "X", or " "),
+    // queueing each for the UI consumer and recording the right boundary
+    // marker in the morse-row symbol string: " /" for letter, " //" for word.
     for (int i = 0; i < (int)text.length(); i++) {
-        vailTxLastDecodedChar = text[i];
-        vailTxDecodedReady = true;
+        char c = text[i];
+        vailTxDecodedQueue += c;
+        if (c == ' ') {
+            // Word break: promote the prior letter boundary to a word boundary
+            // when one is already trailing, otherwise append a fresh marker.
+            if (vailTxMorseSymbols.endsWith(" /")) {
+                vailTxMorseSymbols += "/";  // " /" → " //"
+            } else {
+                vailTxMorseSymbols += " //";
+            }
+        } else {
+            vailTxMorseSymbols += " /";
+        }
     }
-    vailTxMorseSymbols += " /";
 }
 
 static void vailOnDecoded(String morse, String text) {
@@ -253,7 +268,7 @@ String chatInput = "";
 unsigned long chatLastBlink = 0;
 bool chatCursorVisible = true;
 const int MAX_CHAT_MESSAGES = 20;  // Keep last 20 messages
-const int MAX_CHAT_INPUT = 40;     // Max 40 chars per message
+const int MAX_CHAT_INPUT = 20;     // Max 20 chars per message (caps morse airtime to ~13s at 18 WPM)
 
 // Room selection state
 bool vailRoomSelectionMode = false;  // Room selection menu active
@@ -1370,25 +1385,77 @@ void addChatMessage(String callsign, String message) {
   }
 }
 
-// Send text chat message over WebSocket
+// Encode a text message into Vail Duration array (alternating tone/silence ms).
+// Uses current cwSpeed for dit length, with standard CW spacing:
+//   dot=1u, dash=3u, intra-char gap=1u, letter gap=3u, word gap=7u.
+// Skips characters with no morse mapping; collapses runs of spaces into one
+// word gap.
+static void vailTextToDurations(const String& text, std::vector<uint16_t>& out) {
+  int wpm = (cwSpeed > 0) ? cwSpeed : 18;
+  int dit = 1200 / wpm;  // ms per dit
+  bool needGap = false;
+  int pendingGapDits = 3;  // letter gap by default; upgraded to 7 by spaces
+
+  for (int i = 0; i < (int)text.length(); i++) {
+    char c = text[i];
+    if (c == ' ' || c == '\t') {
+      if (needGap) pendingGapDits = 7;  // upgrade pending letter gap to word gap
+      continue;
+    }
+    const char* pattern = getMorseCode(c);
+    if (pattern == nullptr) continue;
+
+    if (needGap) {
+      out.push_back((uint16_t)(pendingGapDits * dit));
+      pendingGapDits = 3;
+    }
+
+    for (int j = 0; pattern[j] != '\0'; j++) {
+      if (j > 0) out.push_back((uint16_t)(1 * dit));  // intra-char gap
+      int len = (pattern[j] == '.') ? 1 : 3;
+      out.push_back((uint16_t)(len * dit));
+    }
+    needGap = true;
+  }
+}
+
+// Send text chat message over WebSocket. Includes a Duration array encoding
+// the message as morse so receivers play it audibly while the Text field lands
+// in chat history exactly once.
 void sendChatMessage(String message) {
   if (vailState != VAIL_CONNECTED) {
     Serial.println("Not connected - cannot send chat message");
     return;
   }
 
-  StaticJsonDocument<512> doc;
-  doc["Timestamp"] = getCurrentTimestamp();
-  JsonArray duration = doc.createNestedArray("Duration");  // Empty duration array
+  StaticJsonDocument<2048> doc;
+  int64_t timestamp = getCurrentTimestamp();
+  doc["Timestamp"] = timestamp;
   doc["Callsign"] = vailCallsign;
   doc["TxTone"] = vailTxTone;
-  doc["Text"] = message;  // Add text message field (per Vail API spec)
+  doc["Text"] = message;
+
+  std::vector<uint16_t> durations;
+  vailTextToDurations(message, durations);
+
+  JsonArray durArray = doc.createNestedArray("Duration");
+  for (uint16_t d : durations) durArray.add(d);
 
   String output;
   serializeJson(doc, output);
 
-  Serial.print("Sending chat message: ");
+  Serial.print("Sending chat message (");
+  Serial.print(durations.size());
+  Serial.print(" elements): ");
   Serial.println(output);
+
+  // Echo-filter our own morse playback so we don't hear ourselves.
+  if (!durations.empty()) {
+    recentTxTimestamps.push_back(timestamp);
+    while (recentTxTimestamps.size() > MAX_TX_TIMESTAMPS) {
+      recentTxTimestamps.pop_front();
+    }
+  }
 
   webSocket.sendTXT(output);
 }

@@ -1590,7 +1590,7 @@ static bool vail_custom_room_mode = false;
 static bool vail_callsign_required = false;  // True if user needs to set callsign
 static lv_obj_t* vail_callsign_overlay = NULL;
 static VailState lastKnownVailState = VAIL_DISCONNECTED;  // Track connection state changes
-#define VAIL_MAX_INPUT_LEN 55
+#define VAIL_MAX_INPUT_LEN 20  // Caps morse airtime to ~13s at 18 WPM when chat sends as morse
 static String vail_chat_input_text = "";  // Text being typed in chat view
 
 // Forward declarations
@@ -2646,7 +2646,7 @@ lv_obj_t* createVailRepeaterScreen() {
 
     // Chat message history (~60% of content height)
     int chat_header_h = 20;
-    int morse_row_h   = 26;
+    int morse_row_h   = 34;
     int input_row_h   = 38;
     int history_h = content_height - chat_header_h - morse_row_h - input_row_h - 6;
 
@@ -2673,8 +2673,9 @@ lv_obj_t* createVailRepeaterScreen() {
     if (!vailShowMorseRow) lv_obj_add_flag(vail_morse_row_bg, LV_OBJ_FLAG_HIDDEN);
 
     vail_morse_row_label = lv_label_create(vail_morse_row_bg);
+    lv_label_set_recolor(vail_morse_row_label, true);  // Per-char color alternation in update loop
     lv_label_set_text(vail_morse_row_label, "");
-    lv_obj_set_style_text_font(vail_morse_row_label, getThemeFonts()->font_body, 0);
+    lv_obj_set_style_text_font(vail_morse_row_label, getThemeFonts()->font_subtitle, 0);
     lv_obj_set_style_text_color(vail_morse_row_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(vail_morse_row_label, LV_ALIGN_LEFT_MID, 4, 0);
 
@@ -2913,25 +2914,77 @@ void updateVailScreenLVGL() {
         vail_last_chat_count = chatHistory.size();
     }
 
-    // Update morse history row (full accumulated symbols)
+    // Update morse history row. Splits vailTxMorseSymbols on letter ("/") and
+    // word ("//") boundaries emitted by vailTxOnDecoded, rewrapping each
+    // character's dits/dahs in alternating theme-color recolor. Word breaks
+    // get a wider literal gap so "73" and "73 tu" read distinctly.
     if (vail_morse_row_label != NULL && vail_current_view == 1) {
         static String lastMorse = "";
         if (vailTxMorseSymbols != lastMorse) {
             lastMorse = vailTxMorseSymbols;
-            lv_label_set_text(vail_morse_row_label, vailTxMorseSymbols.c_str());
+
+            // Format theme colors as 6-char hex for LVGL's #RRGGBB ...# recolor syntax
+            char colorAHex[8], colorBHex[8];
+            snprintf(colorAHex, sizeof(colorAHex), "%06lX",
+                     (unsigned long)(lv_color_to32(LV_COLOR_TEXT_PRIMARY) & 0xFFFFFF));
+            snprintf(colorBHex, sizeof(colorBHex), "%06lX",
+                     (unsigned long)(lv_color_to32(LV_COLOR_ACCENT_SECONDARY) & 0xFFFFFF));
+            const char* CHAR_COLORS[2] = {colorAHex, colorBHex};
+            static const char* LETTER_GAP = " ";        // intra-word
+            static const char* WORD_GAP   = "    ";     // 4 spaces between words
+
+            String colored = "";
+            int colorIdx = 0;
+            int cursor = 0;
+            int len = vailTxMorseSymbols.length();
+            String pendingGap = "";
+            while (cursor <= len) {
+                // Prefer " //" (word) over " /" (letter) when both match here
+                int wordSep   = vailTxMorseSymbols.indexOf(" //", cursor);
+                int letterSep = vailTxMorseSymbols.indexOf(" /",  cursor);
+                int sep, sepLen;
+                bool isWord;
+                if (wordSep >= 0 && (letterSep < 0 || wordSep <= letterSep)) {
+                    sep = wordSep; sepLen = 3; isWord = true;
+                } else if (letterSep >= 0) {
+                    sep = letterSep; sepLen = 2; isWord = false;
+                } else {
+                    sep = -1; sepLen = 0; isWord = false;
+                }
+
+                int end = (sep < 0) ? len : sep;
+                String chunk = vailTxMorseSymbols.substring(cursor, end);
+                if (chunk.length() > 0 && chunk.charAt(0) == ' ') chunk.remove(0, 1);
+                if (chunk.length() > 0) {
+                    if (pendingGap.length() > 0) colored += pendingGap;
+                    colored += "#";
+                    colored += CHAR_COLORS[colorIdx];
+                    colored += " ";
+                    colored += chunk;
+                    colored += "#";
+                    colorIdx ^= 1;
+                }
+                pendingGap = isWord ? WORD_GAP : LETTER_GAP;
+                if (sep < 0) break;
+                cursor = sep + sepLen;
+            }
+            lv_label_set_text(vail_morse_row_label, colored.c_str());
         }
     }
 
-    // Consume decoded character into compose text
-    if (vailTxDecodedReady) {
-        vailTxDecodedReady = false;
-        if (vailTxLastDecodedChar != 0) {
+    // Consume any decoded characters into the compose text. Drain the whole
+    // queue so multi-char emits (e.g. "X ") don't drop characters.
+    if (vailTxDecodedQueue.length() > 0) {
+        String pending = vailTxDecodedQueue;
+        vailTxDecodedQueue = "";
+        for (int i = 0; i < (int)pending.length(); i++) {
+            char c = pending.charAt(i);
             if ((int)vail_chat_input_text.length() < VAIL_MAX_INPUT_LEN) {
-                vail_chat_input_text += (char)vailTxLastDecodedChar;
+                vail_chat_input_text += c;
             } else {
                 beep(TONE_ERROR, BEEP_SHORT);
+                break;
             }
-            vailTxLastDecodedChar = 0;
         }
     }
 
