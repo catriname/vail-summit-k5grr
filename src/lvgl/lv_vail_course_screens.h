@@ -215,14 +215,9 @@ lv_obj_t* createVailCourseLessonSelectScreen() {
         lv_obj_set_size(btn, 350, 50);
         applyMenuCardStyle(btn);
 
-        // Override focused state on all lesson buttons: warning border, normal bg (not accent fill)
-        lv_obj_set_style_bg_color(btn, LV_COLOR_BG_CARD, LV_STATE_FOCUSED);
-        lv_obj_set_style_border_color(btn, LV_COLOR_WARNING, LV_STATE_FOCUSED);
-        lv_obj_set_style_border_width(btn, 2, LV_STATE_FOCUSED);
-
-        if (current) {
-            lv_obj_add_style(btn, getStyleMenuCardFocused(), 0);
-        }
+        // Focused: accent fill, white text
+        lv_obj_set_style_bg_color(btn, LV_COLOR_ACCENT_PRIMARY, LV_STATE_FOCUSED);
+        lv_obj_set_style_text_color(btn, LV_COLOR_TEXT_PRIMARY, LV_STATE_FOCUSED);
 
         lv_obj_t* lbl = lv_label_create(btn);
         char lessonText[64];
