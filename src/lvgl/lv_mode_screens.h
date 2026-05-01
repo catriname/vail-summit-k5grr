@@ -1590,7 +1590,7 @@ static bool vail_custom_room_mode = false;
 static bool vail_callsign_required = false;  // True if user needs to set callsign
 static lv_obj_t* vail_callsign_overlay = NULL;
 static VailState lastKnownVailState = VAIL_DISCONNECTED;  // Track connection state changes
-#define VAIL_MAX_INPUT_LEN 55
+#define VAIL_MAX_INPUT_LEN 20  // Caps morse airtime to ~13s at 18 WPM
 static String vail_chat_input_text = "";  // Text being typed in chat view
 
 // Forward declarations
@@ -2646,8 +2646,8 @@ lv_obj_t* createVailRepeaterScreen() {
 
     // Chat message history (~60% of content height)
     int chat_header_h = 20;
-    int morse_row_h   = 26;
     int input_row_h   = 38;
+    int morse_row_h   = input_row_h;  // match input row height
     int history_h = content_height - chat_header_h - morse_row_h - input_row_h - 6;
 
     vail_chat_textarea = lv_textarea_create(vail_chat_panel);
@@ -2674,7 +2674,9 @@ lv_obj_t* createVailRepeaterScreen() {
 
     vail_morse_row_label = lv_label_create(vail_morse_row_bg);
     lv_label_set_text(vail_morse_row_label, "");
-    lv_obj_set_style_text_font(vail_morse_row_label, getThemeFonts()->font_body, 0);
+    // Use Special Elite (typewriter-style) for distinctive dit/dah glyphs
+    // regardless of active theme.
+    lv_obj_set_style_text_font(vail_morse_row_label, &font_special_elite_18, 0);
     lv_obj_set_style_text_color(vail_morse_row_label, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(vail_morse_row_label, LV_ALIGN_LEFT_MID, 4, 0);
 
