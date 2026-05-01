@@ -10,12 +10,12 @@
 
 enum DecoderType { DECODER_ADAPTIVE = 0, DECODER_DIRECT = 1 };
 
-DecoderType decoderType = DECODER_ADAPTIVE;
+DecoderType decoderType = DECODER_DIRECT;
 
 void loadDecoderSettings() {
   Preferences prefs;
   prefs.begin("decoder", true);
-  decoderType = (DecoderType)prefs.getInt("type", DECODER_ADAPTIVE);
+  decoderType = (DecoderType)prefs.getInt("type", DECODER_DIRECT);
   prefs.end();
 }
 
