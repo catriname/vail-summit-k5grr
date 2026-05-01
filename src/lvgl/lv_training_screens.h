@@ -2469,13 +2469,14 @@ static void cwaCopySubmitAnswer() {
         if (cwaCopyRound >= 10) {
             cwaCopyUIState = CWA_COPY_COMPLETE;
         } else {
-            cwaCopyInput = "";
-            cwaCopyUIState = CWA_COPY_WAITING;
+            // Show CORRECT feedback briefly so the user sees their final input
+            // before the next round begins.
+            cwaCopyUIState = CWA_COPY_FEEDBACK;
             updateCWACopyPracticeUI();
             if (cwa_copy_autoplay_timer) {
                 lv_timer_del(cwa_copy_autoplay_timer);
             }
-            cwa_copy_autoplay_timer = lv_timer_create(cwa_copy_autoplay_timer_cb, 1000, NULL);
+            cwa_copy_autoplay_timer = lv_timer_create(cwa_copy_autoplay_timer_cb, 800, NULL);
         }
     } else {
         beep(400, 300);  // Error beep
