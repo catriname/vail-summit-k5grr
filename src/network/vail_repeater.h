@@ -130,6 +130,38 @@ const float CLOCK_SKEW_ALPHA = 0.3f;  // Exponential moving average weight
 
 // TX morse compose state
 String vailTxMorseSymbols = "";       // current char being keyed: ". - ." etc
+// RX morse-row visualization (incoming durations classified by length).
+String vailRxMorseSymbols = "";
+
+// Append a dit or dah to the RX morse row based on tone duration vs current
+// cwSpeed dit length. Adds a leading space if the accumulator already has
+// content (mirrors the TX-side pattern).
+static void vailRxAppendTone(uint16_t toneMs) {
+    if (!vailShowDecoded) return;
+    float ditMs = 1200.0f / (float)cwSpeed;
+    if (vailRxMorseSymbols.length() > 0 && !vailRxMorseSymbols.endsWith(" /") && !vailRxMorseSymbols.endsWith(" //"))
+        vailRxMorseSymbols += " ";
+    vailRxMorseSymbols += (toneMs <= ditMs * 2.0f) ? "." : "-";
+    if ((int)vailRxMorseSymbols.length() > 72) {
+        int slashPos = vailRxMorseSymbols.indexOf('/', 15);
+        if (slashPos >= 0 && slashPos + 3 < (int)vailRxMorseSymbols.length())
+            vailRxMorseSymbols = vailRxMorseSymbols.substring(slashPos + 2);
+        else
+            vailRxMorseSymbols = vailRxMorseSymbols.substring(vailRxMorseSymbols.length() - 50);
+    }
+}
+
+// Append a letter/word boundary to the RX morse row based on silence length.
+// Intra-character gaps (≤ 2× dit) are skipped — they're the default rhythm.
+static void vailRxAppendSilence(uint16_t silenceMs) {
+    if (!vailShowDecoded) return;
+    float ditMs = 1200.0f / (float)cwSpeed;
+    if (silenceMs >= ditMs * 5.0f) {
+        vailRxMorseSymbols += " //";
+    } else if (silenceMs >= ditMs * 2.0f) {
+        vailRxMorseSymbols += " /";
+    }
+}
 volatile bool vailTxDecodedReady = false;  // set when TX decoder emits a char
 char vailTxLastDecodedChar = 0;       // the decoded character
 
@@ -460,6 +492,7 @@ void disconnectFromVail() {
   rxQueue.clear();
   vailTxDurations.clear();
   recentTxTimestamps.clear();
+  vailRxMorseSymbols = "";
   chatHistory.clear();
   connectedUsers.clear();
   activeRooms.clear();
@@ -912,6 +945,7 @@ void playbackMessages() {
         #else
           playbackToneFrequency = midiNoteToFrequency(msg.txTone);
         #endif
+        vailRxAppendTone(msg.durations[0]);
         requestStartTone(playbackToneFrequency);  // Non-blocking - audio task starts tone
       }
     }
@@ -951,6 +985,7 @@ void playbackMessages() {
           Serial.println("TONE");
           if (vailShowDecoded && vailRxDecoder)
             vailRxDecoder->addTiming((float)elemDur);
+          vailRxAppendTone(elemDur);
           #if VAIL_USE_LOCAL_TONE_FOR_RECEIVE
             playbackToneFrequency = cwTone;
           #else
@@ -962,6 +997,7 @@ void playbackMessages() {
           Serial.println("SILENCE");
           if (vailShowDecoded && vailRxDecoder)
             vailRxDecoder->addTiming(-(float)elemDur);
+          vailRxAppendSilence(elemDur);
           playbackToneFrequency = 0;
           requestStopTone();  // Non-blocking - audio task handles stop
         }

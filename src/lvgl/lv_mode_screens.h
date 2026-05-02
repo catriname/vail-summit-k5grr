@@ -1552,13 +1552,15 @@ static lv_obj_t* vail_btn_settings = NULL;
 static int vail_landing_focus = 0;           // 0=Chat, 1=Room, 2=Settings
 static lv_obj_t* vail_morse_row_bg = NULL;
 static lv_obj_t* vail_morse_row_label = NULL;
+static lv_obj_t* vail_decoded_row_bg = NULL;
+static lv_obj_t* vail_decoded_row_label = NULL;
 static lv_obj_t* vail_chat_input_box = NULL;
 static lv_obj_t* vail_chat_input_label = NULL;
 static lv_obj_t* vail_chat_room_label = NULL;
 static int vail_current_view = 0;  // 0=Landing, 1=Chat, 2=Settings
 
 // Settings screen rows
-#define VAIL_SETTINGS_ROW_COUNT 4
+#define VAIL_SETTINGS_ROW_COUNT 5
 static lv_obj_t* vail_srow_containers[VAIL_SETTINGS_ROW_COUNT];
 static lv_obj_t* vail_srow_values[VAIL_SETTINGS_ROW_COUNT];
 static int vail_settings_focus = 0;
@@ -1677,6 +1679,7 @@ static void refreshVailSettingsValues() {
     lv_label_set_text(vail_srow_values[1], buf);
     lv_label_set_text(vail_srow_values[2], vail_keytype_names[cwKeyType]);
     lv_label_set_text(vail_srow_values[3], vailShowMorseRow ? "Show" : "Hide");
+    lv_label_set_text(vail_srow_values[4], vailShowDecoded ? "Show" : "Hide");
 }
 
 // Highlight the focused settings row
@@ -1716,6 +1719,14 @@ static void adjustVailSettingsRow(int delta) {
             if (vail_morse_row_bg != NULL) {
                 if (vailShowMorseRow) lv_obj_clear_flag(vail_morse_row_bg, LV_OBJ_FLAG_HIDDEN);
                 else                  lv_obj_add_flag(vail_morse_row_bg,   LV_OBJ_FLAG_HIDDEN);
+            }
+            break;
+        case 4:
+            vailShowDecoded = !vailShowDecoded;
+            saveVailSettings();
+            if (vail_decoded_row_bg != NULL) {
+                if (vailShowDecoded) lv_obj_clear_flag(vail_decoded_row_bg, LV_OBJ_FLAG_HIDDEN);
+                else                 lv_obj_add_flag(vail_decoded_row_bg,  LV_OBJ_FLAG_HIDDEN);
             }
             break;
     }
@@ -2531,6 +2542,8 @@ lv_obj_t* createVailRepeaterScreen() {
     }
     vail_morse_row_bg = NULL;
     vail_morse_row_label = NULL;
+    vail_decoded_row_bg = NULL;
+    vail_decoded_row_label = NULL;
 
     // Title bar
     lv_obj_t* title_bar = lv_obj_create(screen);
@@ -2648,7 +2661,8 @@ lv_obj_t* createVailRepeaterScreen() {
     int chat_header_h = 20;
     int input_row_h   = 38;
     int morse_row_h   = input_row_h;  // match input row height
-    int history_h = content_height - chat_header_h - morse_row_h - input_row_h - 6;
+    int decoded_row_h = input_row_h;  // RX decoded row mirrors morse row size
+    int history_h = content_height - chat_header_h - decoded_row_h - morse_row_h - input_row_h - 8;
 
     vail_chat_textarea = lv_textarea_create(vail_chat_panel);
     lv_obj_set_size(vail_chat_textarea, SCREEN_WIDTH - 20, history_h);
@@ -2660,8 +2674,26 @@ lv_obj_t* createVailRepeaterScreen() {
     lv_obj_clear_flag(vail_chat_textarea, LV_OBJ_FLAG_CLICK_FOCUSABLE);
     lv_textarea_set_cursor_click_pos(vail_chat_textarea, false);
 
+    // RX decoded morse row — shows dits/dahs decoded from incoming audio
+    int decoded_row_y = chat_header_h + history_h + 2;
+    vail_decoded_row_bg = lv_obj_create(vail_chat_panel);
+    lv_obj_set_size(vail_decoded_row_bg, SCREEN_WIDTH - 20, decoded_row_h);
+    lv_obj_set_pos(vail_decoded_row_bg, 10, decoded_row_y);
+    lv_obj_set_style_pad_all(vail_decoded_row_bg, 0, 0);
+    lv_obj_set_style_bg_color(vail_decoded_row_bg, LV_COLOR_BG_LAYER2, 0);
+    lv_obj_set_style_border_width(vail_decoded_row_bg, 0, 0);
+    lv_obj_set_style_radius(vail_decoded_row_bg, 4, 0);
+    lv_obj_clear_flag(vail_decoded_row_bg, LV_OBJ_FLAG_SCROLLABLE);
+    if (!vailShowDecoded) lv_obj_add_flag(vail_decoded_row_bg, LV_OBJ_FLAG_HIDDEN);
+
+    vail_decoded_row_label = lv_label_create(vail_decoded_row_bg);
+    lv_label_set_text(vail_decoded_row_label, "");
+    lv_obj_set_style_text_font(vail_decoded_row_label, &font_special_elite_18, 0);
+    lv_obj_set_style_text_color(vail_decoded_row_label, LV_COLOR_TEXT_SECONDARY, 0);
+    lv_obj_align(vail_decoded_row_label, LV_ALIGN_LEFT_MID, 4, 0);
+
     // Morse symbol row — shows dits/dahs as user keys current character
-    int morse_row_y = chat_header_h + history_h + 2;
+    int morse_row_y = decoded_row_y + decoded_row_h + 2;
     vail_morse_row_bg = lv_obj_create(vail_chat_panel);
     lv_obj_set_size(vail_morse_row_bg, SCREEN_WIDTH - 20, morse_row_h);
     lv_obj_set_pos(vail_morse_row_bg, 10, morse_row_y);
@@ -2711,7 +2743,7 @@ lv_obj_t* createVailRepeaterScreen() {
     lv_obj_clear_flag(vail_settings_panel, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(vail_settings_panel, LV_OBJ_FLAG_HIDDEN);
 
-    static const char* srow_names[VAIL_SETTINGS_ROW_COUNT] = {"Speed", "Tone", "Key Type", "Morse Row"};
+    static const char* srow_names[VAIL_SETTINGS_ROW_COUNT] = {"Speed", "Tone", "Key Type", "Morse Row", "Decoded Row"};
     int row_h = content_height / VAIL_SETTINGS_ROW_COUNT;
 
     for (int i = 0; i < VAIL_SETTINGS_ROW_COUNT; i++) {
@@ -2921,6 +2953,15 @@ void updateVailScreenLVGL() {
         if (vailTxMorseSymbols != lastMorse) {
             lastMorse = vailTxMorseSymbols;
             lv_label_set_text(vail_morse_row_label, vailTxMorseSymbols.c_str());
+        }
+    }
+
+    // Update RX decoded row (dits/dahs from incoming durations)
+    if (vail_decoded_row_label != NULL && vail_current_view == 1) {
+        static String lastRxMorse = "";
+        if (vailRxMorseSymbols != lastRxMorse) {
+            lastRxMorse = vailRxMorseSymbols;
+            lv_label_set_text(vail_decoded_row_label, vailRxMorseSymbols.c_str());
         }
     }
 
