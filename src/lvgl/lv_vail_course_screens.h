@@ -789,15 +789,25 @@ static void vail_course_lesson_key_handler(lv_event_t* e) {
             int totalTotal = vailCourseProgress.sessionTotal;
             int percentage = (totalTotal > 0) ? (totalCorrect * 100 / totalTotal) : 0;
 
-            if (percentage >= VAIL_LESSON_PASS_THRESHOLD) {
-                // Pass - unlock next lesson
-                completeVailCourseLesson(vailCourseProgress.currentModule, vailCourseProgress.currentLesson);
-                saveVailCourseProgress();
+            VailCourseModule module = vailCourseProgress.currentModule;
+            int curLesson = vailCourseProgress.currentLesson;
+            int maxLessons = vailCourseLessonCounts[module];
+            const bool passed = (percentage >= VAIL_LESSON_PASS_THRESHOLD);
+
+            if (passed) {
+                completeVailCourseLesson(module, curLesson);
+                if (curLesson < maxLessons) {
+                    vailCourseProgress.currentLesson = curLesson + 1;
+                }
             }
 
-            // Go back to lesson select
             endVailCourseSession();
-            onLVGLMenuSelect(MODE_VAIL_COURSE_LESSON_SELECT);
+
+            if (passed && curLesson < maxLessons) {
+                onLVGLMenuSelect(MODE_VAIL_COURSE_LESSON);
+            } else {
+                onLVGLMenuSelect(MODE_VAIL_COURSE_LESSON_SELECT);
+            }
         }
         return;
     }
@@ -1053,7 +1063,7 @@ void updateVailCourseLessonUI() {
                 break;
 
             case PHASE_RESULT:
-                lv_label_set_text(lessonState.prompt_label, "Press ENTER to continue");
+                lv_label_set_text(lessonState.prompt_label, "");
                 break;
 
             default:
