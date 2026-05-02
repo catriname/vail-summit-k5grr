@@ -264,6 +264,7 @@ struct VailCourseLessonState {
     int playbackCount;           // Times character has been played
     bool waitingForInput;        // Waiting for user's answer
     bool showingFeedback;        // Showing correct/incorrect feedback
+    bool lastAnswerWasCorrect;   // Result of the answer that triggered current feedback (not phase totals)
     unsigned long feedbackTime;  // When feedback started
 
     // Intro phase state
@@ -465,6 +466,7 @@ void submitVailCourseGroupAnswer() {
     if (correct) vailCourseProgress.sessionCorrect++;
 
     // Show feedback
+    lessonState.lastAnswerWasCorrect = correct;
     lessonState.showingFeedback = true;
     lessonState.feedbackTime = millis();
 
@@ -699,6 +701,7 @@ void checkVailCourseLessonAnswer(char answer) {
     if (correct) vailCourseProgress.sessionCorrect++;
 
     // Show feedback
+    lessonState.lastAnswerWasCorrect = correct;
     lessonState.showingFeedback = true;
     lessonState.feedbackTime = millis();
 
@@ -1001,20 +1004,37 @@ void updateVailCourseLessonUI() {
         }
     }
 
-    // Update feedback label
+    // Update feedback label (text before align: first show needs final sizes for lv_obj_align_to)
     if (lessonState.feedback_label) {
         if (lessonState.showingFeedback) {
-            bool lastWasCorrect = (lessonState.phaseCorrect == lessonState.phaseTotal);
-            if (lastWasCorrect) {
+            if (lessonState.lastAnswerWasCorrect) {
                 lv_label_set_text(lessonState.feedback_label, "Correct!");
                 lv_obj_set_style_text_color(lessonState.feedback_label, LV_COLOR_SUCCESS, 0);
-                lv_obj_set_style_text_color(lessonState.main_label, LV_COLOR_SUCCESS, 0);
+                if (lessonState.main_label) {
+                    lv_obj_set_style_text_color(lessonState.main_label, LV_COLOR_SUCCESS, 0);
+                }
             } else {
                 lv_label_set_text(lessonState.feedback_label, "Incorrect");
                 lv_obj_set_style_text_color(lessonState.feedback_label, LV_COLOR_ERROR, 0);
-                lv_obj_set_style_text_color(lessonState.main_label, LV_COLOR_ERROR, 0);
+                if (lessonState.main_label) {
+                    lv_obj_set_style_text_color(lessonState.main_label, LV_COLOR_ERROR, 0);
+                }
             }
             lv_obj_clear_flag(lessonState.feedback_label, LV_OBJ_FLAG_HIDDEN);
+            if (lessonState.main_label) {
+                lv_obj_t* content = lv_obj_get_parent(lessonState.main_label);
+                if (content) {
+                    lv_obj_update_layout(content);
+                }
+                if (phase == PHASE_GROUPS && lessonState.group_input_label &&
+                    !lv_obj_has_flag(lessonState.group_input_label, LV_OBJ_FLAG_HIDDEN)) {
+                    lv_obj_align_to(lessonState.feedback_label, lessonState.group_input_label,
+                                    LV_ALIGN_OUT_BOTTOM_MID, 0, 18);
+                } else {
+                    lv_obj_align_to(lessonState.feedback_label, lessonState.main_label,
+                                    LV_ALIGN_OUT_BOTTOM_MID, 0, 18);
+                }
+            }
         } else {
             lv_obj_add_flag(lessonState.feedback_label, LV_OBJ_FLAG_HIDDEN);
         }
@@ -1147,7 +1167,7 @@ lv_obj_t* createVailCourseLessonScreen() {
     lessonState.feedback_label = lv_label_create(content);
     lv_label_set_text(lessonState.feedback_label, "");
     lv_obj_set_style_text_font(lessonState.feedback_label, getThemeFonts()->font_input, 0);
-    lv_obj_align(lessonState.feedback_label, LV_ALIGN_CENTER, 0, 30);
+    lv_obj_align_to(lessonState.feedback_label, lessonState.main_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 18);
     lv_obj_add_flag(lessonState.feedback_label, LV_OBJ_FLAG_HIDDEN);
 
     // Group input display (for PHASE_GROUPS, below main label)
