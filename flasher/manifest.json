@@ -1,0 +1,14 @@
+{
+  "name": "VAIL SUMMIT (K5GRR Fork)",
+  "version": "dev",
+  "home_assistant_domain": "",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        { "path": "vail-summit.bin", "offset": 0 }
+      ]
+    }
+  ]
+}
