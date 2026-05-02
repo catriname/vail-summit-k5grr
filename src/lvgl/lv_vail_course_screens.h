@@ -861,6 +861,16 @@ static void vail_course_lesson_key_handler(lv_event_t* e) {
         return;
     }
 
+    // Waiting for input: still allow SPACE to replay (footer: "SPACE Replay"). ENTER replays in
+    // solo/mixed only; in GROUPS, ENTER submits (handled below).
+    if (key == ' ' || (vailCourseProgress.currentPhase != PHASE_GROUPS && key == LV_KEY_ENTER)) {
+        cancelVailCourseAutoplayTimer();
+        if (!isMorsePlaybackActive()) {
+            playCurrentCharacter();
+        }
+        return;
+    }
+
     // Waiting for input
     if (vailCourseProgress.currentPhase == PHASE_GROUPS) {
         // Group input mode: accumulate characters
