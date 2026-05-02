@@ -664,9 +664,10 @@ bool handleCWSchoolMode(int mode) {
             screen = createCWSchoolAccountScreen();
             break;
 
-        // Future modes for training, progress, etc.
-        // case MODE_CWSCHOOL_TRAINING:
-        // case MODE_CWSCHOOL_PROGRESS:
+        // Logical submenu for Vail Course parent chain; no separate UI (same as main CW School menu)
+        case MODE_CWSCHOOL_TRAINING:
+            screen = createCWSchoolMenuScreen();
+            break;
 
         default:
             return false;  // Not a CW School mode
