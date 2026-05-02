@@ -752,13 +752,11 @@ void vailKeyerCallback(bool txOn, int element) {
   unsigned long now = millis();
 
   if (txOn) {
-    // Use Core 0 audio task for sidetone so it auto-refills the I2S DMA
-    // independent of Core 1's loop (webSocket.loop() can stall long enough
-    // to underrun the buffer if we drive continueTone from here).
-    requestStartTone(cwTone);
+    startTone(cwTone);
 
-    // Stop any received-message playback in progress
+    // Stop any playback in progress
     if (isPlaying) {
+      requestStopTone();
       isPlaying = false;
       playbackToneFrequency = 0;
     }
@@ -771,7 +769,7 @@ void vailKeyerCallback(bool txOn, int element) {
     vailLastStateChangeTime = now;
     vailLastToneState = true;
   } else {
-    requestStopTone();
+    stopTone();
 
     if (vailLastToneState && vailLastStateChangeTime > 0) {
       float toneDuration = now - vailLastStateChangeTime;
@@ -843,8 +841,7 @@ void updateVailRepeater(LGFX &display) {
       vailDahPressed = newDahPressed;
     }
     vailKeyer->tick(millis());
-    // Core 0 audio task auto-refills the I2S buffer while a tone is active,
-    // so no continueTone() call is needed here.
+    if (vailKeyer->isTxActive()) continueTone(cwTone);
 
     // Reset transmission state after 2 seconds of inactivity
     if (vailIsTransmitting && !vailKeyer->isTxActive() && (millis() - vailTxStartTime > 2000)) {
