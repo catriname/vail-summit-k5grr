@@ -31,3 +31,4 @@ src/core/secrets_local.h
 # OS files
 .DS_Store
 Thumbs.db
+/.vs
