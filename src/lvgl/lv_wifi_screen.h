@@ -14,6 +14,12 @@
 #include "../core/config.h"
 #include "../settings/settings_wifi.h"
 
+// Private key code for WiFi password visibility toggle.
+// LVGL v8.3 does not expose LV_USER_KEY_START in headers; use an unused control-code slot instead.
+// Routed from CardKB TAB in lv_init.h so TAB is never treated as LVGL group NEXT (LV_KEY_NEXT == '\t').
+// Chosen value must not collide with lv_group.h LV_KEY_* enum values or normal printable ASCII (32-126).
+#define LVGL_KEY_WIFI_PASSWORD_TAB ((uint32_t)0x16) /* DC2 - not used by LVGL keypad keys */
+
 // ============================================
 // WiFi Screen State Machine
 // ============================================
@@ -50,6 +56,20 @@ static String wifi_error_message = "";
 static String wifi_failed_ssid = "";
 static bool wifi_scan_pending = false;  // Flag to trigger scan after screen loads
 static lv_obj_t* wifi_password_hint = NULL;  // For partial updates of hint text
+
+// Password visibility toggle key for WiFi password entry.
+static bool isPasswordToggleKey(uint32_t key) {
+    return key == LVGL_KEY_WIFI_PASSWORD_TAB || key == '\t' || key == LV_KEY_NEXT;
+}
+
+// Called from lv_init.h keypad read path before keys reach the default LVGL input group.
+bool lvglWifiPasswordRemapTab(uint32_t* key) {
+    if (!key) return false;
+    if (wifi_lvgl_state != LVGL_WIFI_PASSWORD_INPUT) return false;
+    if (*key != '\t' && *key != LV_KEY_NEXT) return false;
+    *key = LVGL_KEY_WIFI_PASSWORD_TAB;
+    return true;
+}
 
 // ============================================
 // Forward Declarations
@@ -366,7 +386,7 @@ static void wifi_global_key_handler(lv_event_t* e) {
             break;
 
         case LVGL_WIFI_PASSWORD_INPUT:
-            if (key == '\t' || key == 9) {
+            if (isPasswordToggleKey(key)) {
                 // Toggle password visibility
                 wifi_password_visible = !wifi_password_visible;
                 if (wifi_password_textarea) {
@@ -747,7 +767,7 @@ static void password_textarea_key_handler(lv_event_t* e) {
             attemptWiFiConnection(networks[wifi_selected_network].ssid, password);
         }
         lv_event_stop_bubbling(e);  // Prevent default textarea handling
-    } else if (key == '\t' || key == 9) {
+    } else if (isPasswordToggleKey(key)) {
         // Toggle password visibility
         wifi_password_visible = !wifi_password_visible;
         if (wifi_password_textarea) {
@@ -758,7 +778,7 @@ static void password_textarea_key_handler(lv_event_t* e) {
             lv_label_set_text(wifi_password_hint, wifi_password_visible ? "TAB: Hide password" : "TAB: Show password");
         }
         beep(TONE_MENU_NAV, BEEP_SHORT);
-        lv_event_stop_bubbling(e);  // Prevent default textarea handling
+        lv_event_stop_processing(e);  // Prevent default TAB focus/navigation handling
     } else if (key == LV_KEY_ESC) {
         // Go back to network list
         wifi_lvgl_state = LVGL_WIFI_NETWORK_LIST;
