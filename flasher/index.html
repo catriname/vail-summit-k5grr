@@ -87,6 +87,34 @@
       color: var(--text-muted);
     }
     a { color: var(--accent-primary); }
+
+      .myButton {
+          box-shadow: 0px 1px 0px 0px #fff6af;
+          background: linear-gradient(to bottom, #ffec64 5%, #ffab23 100%);
+          background-color: #ffec64;
+          border-radius: 6px;
+          border: 1px solid #ffaa22;
+          display: inline-block;
+          cursor: pointer;
+          color: #333333;
+          font-family: Arial;
+          font-size: 15px;
+          font-weight: bold;
+          padding: 12px 24px;
+          text-decoration: none;
+          text-shadow: 0px 1px 0px #ffee66;
+      }
+
+          .myButton:hover {
+              background: linear-gradient(to bottom, #ffab23 5%, #ffec64 100%);
+              background-color: #ffab23;
+          }
+
+          .myButton:active {
+              position: relative;
+              top: 1px;
+          }
+
   </style>
 </head>
 <body>
@@ -98,7 +126,7 @@
 
     <div class="install-row">
       <esp-web-install-button manifest="manifest.json">
-        <button slot="activate">Install VAIL SUMMIT</button>
+        <button slot="activate" class="myButton">INSTALL VAIL SUMMIT</button>
         <span slot="unsupported" class="unsupported">Your browser doesn't support Web Serial. Use Chrome, Edge, or Opera on desktop.</span>
         <span slot="not-allowed" class="unsupported">This page must be served over HTTPS.</span>
       </esp-web-install-button>
