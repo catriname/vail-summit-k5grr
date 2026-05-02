@@ -60,7 +60,7 @@ jobs:
             --fqbn "esp32:esp32:adafruit_feather_esp32s3:CDCOnBoot=cdc,PartitionScheme=huge_app,PSRAM=enabled,FlashSize=4M,USBMode=hwcdc" \
             --output-dir build \
             --export-binaries \
-            vail-summit.ino
+            vail-summit-k5grr.ino
 
       - name: Install esptool
         run: pip install esptool
