@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v2
@@ -78,6 +80,12 @@ jobs:
 
       - name: Copy flasher UI
         run: cp -r flasher/* public/
+
+      - name: Stamp version into manifest
+        run: |
+          VERSION=$(git describe --tags --always --dirty)
+          echo "Stamping version: $VERSION"
+          sed -i "s/\"version\": \"dev\"/\"version\": \"${VERSION}\"/" public/manifest.json
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
