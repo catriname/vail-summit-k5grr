@@ -15,6 +15,9 @@
 #include "../network/cwschool_link.h"
 #include "../network/internet_check.h"
 
+// TODO: Set true when CW School account link flow is ready for this build.
+static const bool CWSCHOOL_LINK_ACCOUNT_ENABLED = false;
+
 // Forward declarations for mode switching
 extern void setCurrentModeFromInt(int mode);
 extern void onLVGLMenuSelect(int target_mode);  // Proper navigation with screen loading
@@ -471,8 +474,7 @@ lv_obj_t* createCWSchoolAccountScreen() {
         lv_obj_add_event_cb(unlink_btn, cwschool_unlink_confirm, LV_EVENT_CLICKED, NULL);
         lv_obj_add_event_cb(unlink_btn, linear_nav_handler, LV_EVENT_KEY, NULL);
         addNavigableWidget(unlink_btn);
-    } else {
-        // Link button if not linked
+    } else if (CWSCHOOL_LINK_ACCOUNT_ENABLED) {
         lv_obj_t* link_btn = lv_btn_create(screen);
         lv_obj_set_size(link_btn, 200, 50);
         lv_obj_align(link_btn, LV_ALIGN_BOTTOM_MID, 0, -60);
@@ -490,11 +492,27 @@ lv_obj_t* createCWSchoolAccountScreen() {
         }, LV_EVENT_CLICKED, NULL);
         lv_obj_add_event_cb(link_btn, linear_nav_handler, LV_EVENT_KEY, NULL);
         addNavigableWidget(link_btn);
+    } else {
+        // TODO: show Link Account button when enabled
+        lv_obj_t* focus = lv_obj_create(screen);
+        lv_obj_set_size(focus, 1, 1);
+        lv_obj_set_style_bg_opa(focus, LV_OPA_TRANSP, 0);
+        lv_obj_set_style_border_width(focus, 0, 0);
+        lv_obj_add_flag(focus, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_event_cb(focus, [](lv_event_t* e) {
+            if (lv_event_get_code(e) != LV_EVENT_KEY) return;
+            if (lv_event_get_key(e) == LV_KEY_ESC) {
+                onLVGLMenuSelect(MODE_CWSCHOOL);
+            }
+        }, LV_EVENT_KEY, NULL);
+        addNavigableWidget(focus);
     }
 
     // Footer
     lv_obj_t* footer = lv_label_create(screen);
-    lv_label_set_text(footer, isCWSchoolLinked() ? "ENTER Unlink   ESC Back" : "ENTER Link   ESC Back");
+    lv_label_set_text(footer,
+                       isCWSchoolLinked() ? "ENTER Unlink   ESC Back"
+                                          : (CWSCHOOL_LINK_ACCOUNT_ENABLED ? "ENTER Link   ESC Back" : "ESC Back"));
     lv_obj_set_style_text_font(footer, getThemeFonts()->font_body, 0);
     lv_obj_set_style_text_color(footer, LV_COLOR_WARNING, 0);
     lv_obj_align(footer, LV_ALIGN_BOTTOM_MID, 0, -5);
@@ -551,27 +569,30 @@ lv_obj_t* createCWSchoolMenuScreen() {
     lv_obj_set_style_pad_row(menu_container, 15, 0);
     lv_obj_clear_flag(menu_container, LV_OBJ_FLAG_SCROLLABLE);
 
-    // Account button
-    lv_obj_t* account_btn = lv_btn_create(menu_container);
-    lv_obj_set_size(account_btn, 350, 55);
-    lv_obj_set_style_bg_color(account_btn, LV_COLOR_BG_CARD, 0);
-    lv_obj_set_style_bg_color(account_btn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
-    lv_obj_set_style_radius(account_btn, 10, 0);
+    // TODO: Link Account row appears when not linked and CWSCHOOL_LINK_ACCOUNT_ENABLED is true.
+    if (isCWSchoolLinked() || CWSCHOOL_LINK_ACCOUNT_ENABLED) {
+        lv_obj_t* account_btn = lv_btn_create(menu_container);
+        lv_obj_set_size(account_btn, 350, 55);
+        lv_obj_set_style_bg_color(account_btn, LV_COLOR_BG_CARD, 0);
+        lv_obj_set_style_bg_color(account_btn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
+        lv_obj_set_style_radius(account_btn, 10, 0);
 
-    lv_obj_t* account_lbl = lv_label_create(account_btn);
-    lv_label_set_text(account_lbl, isCWSchoolLinked() ? LV_SYMBOL_OK " Account Settings" : LV_SYMBOL_PLUS " Link Account");
-    lv_obj_set_style_text_font(account_lbl, getThemeFonts()->font_input, 0);
-    lv_obj_center(account_lbl);
+        lv_obj_t* account_lbl = lv_label_create(account_btn);
+        lv_label_set_text(account_lbl,
+                          isCWSchoolLinked() ? LV_SYMBOL_OK " Account Settings" : LV_SYMBOL_PLUS " Link Account");
+        lv_obj_set_style_text_font(account_lbl, getThemeFonts()->font_input, 0);
+        lv_obj_center(account_lbl);
 
-    lv_obj_add_event_cb(account_btn, [](lv_event_t* e) {
-        if (isCWSchoolLinked()) {
-            onLVGLMenuSelect(MODE_CWSCHOOL_ACCOUNT);
-        } else {
-            onLVGLMenuSelect(MODE_CWSCHOOL_LINK);
-        }
-    }, LV_EVENT_CLICKED, NULL);
-    lv_obj_add_event_cb(account_btn, linear_nav_handler, LV_EVENT_KEY, NULL);
-    addNavigableWidget(account_btn);
+        lv_obj_add_event_cb(account_btn, [](lv_event_t* e) {
+            if (isCWSchoolLinked()) {
+                onLVGLMenuSelect(MODE_CWSCHOOL_ACCOUNT);
+            } else {
+                onLVGLMenuSelect(MODE_CWSCHOOL_LINK);
+            }
+        }, LV_EVENT_CLICKED, NULL);
+        lv_obj_add_event_cb(account_btn, linear_nav_handler, LV_EVENT_KEY, NULL);
+        addNavigableWidget(account_btn);
+    }
 
     // Training button - navigate to Vail Course module selection
     lv_obj_t* training_btn = lv_btn_create(menu_container);
@@ -656,6 +677,11 @@ bool handleCWSchoolMode(int mode) {
             break;
 
         case MODE_CWSCHOOL_LINK:
+            if (!CWSCHOOL_LINK_ACCOUNT_ENABLED) {
+                // TODO: createCWSchoolLinkScreen() when enabled
+                screen = createCWSchoolMenuScreen();
+                break;
+            }
             cleanupCWSchoolLinkScreen();
             screen = createCWSchoolLinkScreen();
             break;
