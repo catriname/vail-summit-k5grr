@@ -2,6 +2,7 @@
 .claude/
 .vscode/
 .idea/
+.vs/
 
 # Project-specific files (not for distribution)
 CLAUDE.md

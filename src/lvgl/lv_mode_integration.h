@@ -667,21 +667,8 @@ void onLVGLMenuSelect(int target_mode) {
             beep(400, 200);  // Error beep
             Serial.println("[ModeIntegration] QSO Logger requires SD card");
 
-            static const char* btns[] = {"OK", ""};
-            lv_obj_t* msgbox = lv_msgbox_create(NULL, "SD Card Required",
-                "Please insert an SD card\nto use the QSO Logger.", btns, false);
-            lv_obj_center(msgbox);
-            lv_obj_add_style(msgbox, getStyleMsgbox(), 0);
-
-            // Add button to navigation group for keyboard control
-            lv_obj_t* btns_obj = lv_msgbox_get_btns(msgbox);
-            addNavigableWidget(btns_obj);
-
-            // Close on button click
-            lv_obj_add_event_cb(msgbox, [](lv_event_t* e) {
-                lv_obj_t* obj = lv_event_get_current_target(e);
-                lv_msgbox_close(obj);
-            }, LV_EVENT_VALUE_CHANGED, NULL);
+            createAlertDialog("SD Card Required",
+                "Please insert an SD card\nto use the QSO Logger.");
 
             return;
         }

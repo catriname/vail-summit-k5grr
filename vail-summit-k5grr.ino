@@ -73,6 +73,7 @@ using namespace lgfx::v1::fonts;
 // Settings modes
 #include "src/settings/settings_wifi.h"
 #include "src/settings/settings_cw.h"
+#include "src/settings/settings_decoder.h"
 #include "src/settings/settings_volume.h"
 #include "src/settings/settings_brightness.h"
 #include "src/settings/settings_general.h"
@@ -501,6 +502,7 @@ void setup() {
   // Load CW settings from preferences
   Serial.println("Loading CW settings...");
   loadCWSettings();
+  loadDecoderSettings();
 
   // Load radio settings from preferences
   Serial.println("Loading radio settings...");
