@@ -8,6 +8,7 @@
 
 #include <lvgl.h>
 #include <WiFi.h>
+#include "../fonts/extra_font_awesome_icons.h"
 #include "lv_theme_summit.h"
 #include "lv_widgets_summit.h"
 #include "lv_screen_manager.h"
@@ -279,10 +280,11 @@ static const struct {
     const char* icon;
     const char* title;
     int target_mode;
+    const lv_font_t* icon_font; /* NULL: Montserrat 28 + LV_SYMBOL_* */
 } potaMenuItems[] = {
-    {LV_SYMBOL_GPS, "Active Spots", MODE_POTA_ACTIVE_SPOTS},
-    {LV_SYMBOL_HOME, "Activate a Park", MODE_POTA_ACTIVATE},
-    {LV_SYMBOL_AUDIO, "POTA Recorder", MODE_POTA_RECORDER_SETUP}
+    {FA_EXTRA_MAP_MARKED_ALT, "Active Spots", MODE_POTA_ACTIVE_SPOTS, &ExtraFontAwesomeIcons},
+    {FA_EXTRA_ROUTE, "Activate a Park", MODE_POTA_ACTIVATE, &ExtraFontAwesomeIcons},
+    {LV_SYMBOL_AUDIO, "POTA Recorder", MODE_POTA_RECORDER_SETUP, NULL},
 };
 #define POTA_MENU_COUNT 3
 
@@ -345,7 +347,11 @@ lv_obj_t* createPOTAMenuScreen() {
         // Icon
         lv_obj_t* icon = lv_label_create(btn);
         lv_label_set_text(icon, potaMenuItems[i].icon);
-        lv_obj_set_style_text_font(icon, &lv_font_montserrat_28, 0);
+        if (potaMenuItems[i].icon_font != NULL) {
+            lv_obj_set_style_text_font(icon, potaMenuItems[i].icon_font, 0);
+        } else {
+            lv_obj_set_style_text_font(icon, &lv_font_montserrat_28, 0);
+        }
         lv_obj_set_style_text_color(icon, LV_COLOR_TEXT_PRIMARY, 0);
 
         // Title

@@ -4,12 +4,12 @@ This project embeds a subset of **Font Awesome** icons as an LVGL **bitmap font*
 
 | File | Role |
 |------|------|
-| **`extra_font_awesome_icons_shell.h`** | **Stable** — Arduino/LVGL includes, `EXTRAFONTAWESOMEICONS`, `#include` of the fragment. **Do not replace** from the font converter. |
-| **`extra_font_awesome_icons_generated.inc`** | **Replaceable** — paste only the **font body** from [LVGL Font Converter](https://lvgl.io/tools/fontconverter) or `lv_font_conv` here (see [what to strip](#what-to-paste-into-extra_font_awesome_icons_generatedinc) below). |
-| **`extra_font_awesome_icons.c`** | One line: `#include "extra_font_awesome_icons_shell.h"` — keeps the translation unit in the build. **Do not paste** a full converter `.c` over this file. |
+| **`extra_font_awesome_icons_shell.h`** | **Stable** — Arduino/LVGL includes and `EXTRAFONTAWESOMEICONS`. **Do not replace** from the font converter. (It does **not** `#include` the generated fragment — see `.c`.) |
+| **`extra_font_awesome_icons_generated.h`** | **Replaceable** — paste only the **font body** from [LVGL Font Converter](https://lvgl.io/tools/fontconverter) or `lv_font_conv` here (see [what to strip](#what-to-paste-into-extra_font_awesome_icons_generatedh) below). Must live **next to** `extra_font_awesome_icons.c`. Uses **`.h`** so Arduino’s sketch copy step picks it up (`.inc` was often missing in the build temp tree). |
+| **`extra_font_awesome_icons.c`** | Includes `shell.h`, then `#include "extra_font_awesome_icons_generated.h"` (with legacy fallback to `.inc`) inside `#if EXTRAFONTAWESOMEICONS`. **Do not paste** a full converter `.c` over this file. |
 | **`extra_font_awesome_icons.h`** | UTF-8 `FA_EXTRA_*` macros + `LV_FONT_DECLARE` — edit when you add/remove icons. |
 
-**Include rule:** `extra_font_awesome_icons_shell.h` must be included **only** from `extra_font_awesome_icons.c`. Including it from a second `.c` would duplicate `ExtraFontAwesomeIcons` and break the link step.
+**Include rule:** `extra_font_awesome_icons_shell.h` may be included only from `extra_font_awesome_icons.c` (same as today). Only that `.c` pulls in `extra_font_awesome_icons_generated.h`, so `ExtraFontAwesomeIcons` is not duplicated.
 
 **Canonical instructions** for regen live in this Markdown file.
 
@@ -48,16 +48,18 @@ With **`lv_font_conv` 1.5.x** (npm package `lv_font_conv`), a **comma-separated 
 
 ```text
 lv_font_conv ^
-  --font FontAwesome5-Solid+Brands+Regular.woff ^
+  --font fa-solid-900.ttf ^
   -r 0xf0ac-0xf0ac -r 0xf549-0xf549 -r 0xf501-0xf501 -r 0xf19d-0xf19d -r 0xf70e-0xf70e ^
   -r 0xf025-0xf025 -r 0xf2a2-0xf2a2 -r 0xf249-0xf249 -r 0xf518-0xf518 -r 0xf044-0xf044 ^
-  -r 0xf03d-0xf03d -r 0xf086-0xf086 ^
+  -r 0xf03d-0xf03d -r 0xf086-0xf086 -r 0xf44b-0xf44b -r 0xf4c4-0xf4c4 -r 0xf11b-0xf11b ^
+  -r 0xf7d9-0xf7d9 -r 0xf743-0xf743 -r 0xf5a0-0xf5a0 -r 0xf1bb-0xf1bb -r 0xf4d7-0xf4d7 ^
   --size 24 --bpp 1 --no-compress --format lvgl ^
-  --lv-font-name ExtraFontAwesomeIcons ^
   -o fa_conv_out.c
 ```
 
-Then copy the **middle** of `fa_conv_out.c` into **`extra_font_awesome_icons_generated.inc`** (see [what to strip](#what-to-paste-into-extra_font_awesome_icons_generatedinc)). You can use a temp file name instead of `fa_conv_out.c`.
+Use **Font Awesome Free 5.15.4** `webfonts/fa-solid-900.ttf` (e.g. from the npm package or jsDelivr). **lv_font_conv 1.5.x** does not support `--lv-font-name`; name the output font in the middle of the file (or find/replace the generated symbol) to **`ExtraFontAwesomeIcons`**, and strip the outer `#include` / `#if` / `#endif` per [what to paste](#what-to-paste-into-extra_font_awesome_icons_generatedh). The project’s checked-in font was built with a single **solid** TTF; U+F0AC (globe) is present there as the solid style glyph.
+
+Then copy the **middle** of `fa_conv_out.c` into **`extra_font_awesome_icons_generated.h`** (see [what to strip](#what-to-paste-into-extra_font_awesome_icons_generatedh)). You can use a temp file name instead of `fa_conv_out.c`.
 
 (On Unix shells, remove `^` and use `\` line continuation or one long line.)
 
@@ -74,9 +76,9 @@ You *can* use it, but:
 
 ---
 
-## What to paste into `extra_font_awesome_icons_generated.inc`
+## What to paste into extra_font_awesome_icons_generated.h
 
-The shell already provides: `lvgl.h`, **`#if EXTRAFONTAWESOMEICONS`**, and the closing **`#endif`**. Your paste must be **only the font implementation** — the same block the converter would put **inside** its `#if EXTRAFONTAWESOMEICONS`.
+`extra_font_awesome_icons_shell.h` provides `lvgl.h` and the `EXTRAFONTAWESOMEICONS` default. **`extra_font_awesome_icons.c`** wraps the fragment with **`#if EXTRAFONTAWESOMEICONS` … `#endif`**. Your paste must be **only the font implementation** — the same block the converter would put **inside** its `#if EXTRAFONTAWESOMEICONS`.
 
 **Remove from the top of the converter output before pasting:**
 
@@ -86,7 +88,7 @@ The shell already provides: `lvgl.h`, **`#if EXTRAFONTAWESOMEICONS`**, and the c
 
 **Remove from the bottom after pasting:**
 
-- The final **`#endif`** that matches the converter’s **`#if EXTRAFONTAWESOMEICONS`** (the shell supplies the closing `#endif`).
+- The final **`#endif`** that matches the converter’s **`#if EXTRAFONTAWESOMEICONS`** (the **`.c` file** supplies the closing `#endif`, not the fragment).
 
 **Keep in the paste:**
 
@@ -112,11 +114,11 @@ Edit **`src/fonts/extra_font_awesome_icons.h`** whenever codepoints change:
 
 ## Checklist before committing
 
-- [ ] Open **`extra_font_awesome_icons_generated.inc`**: bitmap comments or cmap show **U+F0…** (or correct PUA), **not** only `U+0030`–`U+0039` as the only mapped range for menu icons.
+- [ ] Open **`extra_font_awesome_icons_generated.h`**: bitmap comments or cmap show **U+F0…** (or correct PUA), **not** only `U+0030`–`U+0039` as the only mapped range for menu icons.
 - [ ] **`lv_font_conv`** command line in git / notes uses **`-r`** per icon (or equivalent proven Range), not a broken **`--symbols`** comma list for PUA.
 - [ ] **`extra_font_awesome_icons.h`** macros match every exported codepoint you use in C.
 - [ ] Build with **LVGL 8.3.x**; `LV_USE_FONT_COMPRESSED` matches **`--no-compress`**.
-- [ ] **`extra_font_awesome_icons_shell.h`** / **`extra_font_awesome_icons.c`** were not overwritten by a full converter dump.
+- [ ] **`extra_font_awesome_icons_shell.h`** / **`extra_font_awesome_icons.c`** were not overwritten by a full converter dump, and **`extra_font_awesome_icons_generated.h`** exists beside the `.c` (otherwise you get “No such file or directory”).
 
 ---
 

@@ -23,6 +23,9 @@ arduino-cli/
 # Arduino CLI cache/data (created during builds)
 data/
 
+# Local lv_font_conv scratch (fa-solid-900.ttf download + node_modules)
+.tools/
+
 # Local secrets (for development with real API keys)
 secrets_local.h
 src/core/secrets_local.h

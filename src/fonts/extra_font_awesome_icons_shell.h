@@ -2,7 +2,7 @@
  * Stable shell for ExtraFontAwesomeIcons (LVGL 8.3.x).
  *
  * Do NOT replace this file from the LVGL / lvgl.io font converter.
- * After regenerating, paste only into: extra_font_awesome_icons_generated.inc
+ * After regenerating, paste only into: extra_font_awesome_icons_generated.h
  *
  * Full workflow (what to strip from converter output, -r vs --symbols, etc.):
  *   docs/EXTRA_FONT_AWESOME_ICONS.md
@@ -30,8 +30,5 @@
 #define EXTRAFONTAWESOMEICONS 1
 #endif
 
-#if EXTRAFONTAWESOMEICONS
-
-#include "extra_font_awesome_icons_generated.inc"
-
-#endif /* EXTRAFONTAWESOMEICONS */
+/* Fragment extra_font_awesome_icons_generated.h is #included from extra_font_awesome_icons.c
+ * (same directory) so Arduino / esp32 quote-include resolves reliably. */

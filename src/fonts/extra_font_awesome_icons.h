@@ -1,10 +1,10 @@
 /*
  * UTF-8 macros for glyphs in extra_font_awesome_icons_* (LVGL 8.3.x only; not LVGL 9).
- * Regenerate bitmaps: paste into extra_font_awesome_icons_generated.inc — docs/EXTRA_FONT_AWESOME_ICONS.md
+ * Regenerate bitmaps: paste into extra_font_awesome_icons_generated.h — docs/EXTRA_FONT_AWESOME_ICONS.md
  * LVGL 8.3 font/symbol usage: https://docs.lvgl.io/8.3/overview/font.html
  *
  * Runtime: lv_label_set_text(label, FA_EXTRA_*); lv_obj_set_style_text_font(label, &ExtraFontAwesomeIcons, 0);
- * When you add/change a codepoint here, update the .inc from lv_font_conv and keep macros in sync.
+ * When you add/change a codepoint here, regenerate extra_font_awesome_icons_generated.h and keep macros in sync.
  */
 
 #ifndef EXTRA_FONT_AWESOME_ICONS_H
@@ -49,5 +49,29 @@ LV_FONT_DECLARE(ExtraFontAwesomeIcons);
 
 /* U+F086 — comments (speech bubbles) */
 #define FA_EXTRA_COMMENTS "\xEF\x82\x86"
+
+/* U+F44B — dumbbell */
+#define FA_EXTRA_DUMBBELL "\xEF\x91\x8B"
+
+/* U+F4C4 — hands-helping */
+#define FA_EXTRA_HANDS_HELPING "\xEF\x93\x84"
+
+/* U+F11B — gamepad */
+#define FA_EXTRA_GAMEPAD "\xEF\x84\x9B"
+
+/* U+F7D9 — tools */
+#define FA_EXTRA_TOOLS "\xEF\x9F\x99"
+
+/* U+F743 — cloud-sun-rain */
+#define FA_EXTRA_CLOUD_SUN_RAIN "\xEF\x9D\x83"
+
+/* U+F5A0 — map-marked-alt (POTA active spots) */
+#define FA_EXTRA_MAP_MARKED_ALT "\xEF\x96\xA0"
+
+/* U+F1BB — tree (POTA menu) */
+#define FA_EXTRA_TREE "\xEF\x86\xBB"
+
+/* U+F4D7 — route (activate a park) */
+#define FA_EXTRA_ROUTE "\xEF\x93\x97"
 
 #endif /* EXTRA_FONT_AWESOME_ICONS_H */
