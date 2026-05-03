@@ -28,6 +28,15 @@ Chrome, Edge, or Opera on desktop required (Web Serial).
 - **Exit out of repeater** and return to go online — bug being worked on.
 - Edits are ongoing — please file issues for anything you hit.
 
+## Notes for v0.2.0
+
+- **Custom Font Awesome icons (LVGL 8.3)** for many menu rows: a bitmap subset is embedded as `ExtraFontAwesomeIcons` (see `docs/EXTRA_FONT_AWESOME_ICONS.md`). Ham Tools, Training, Games, and other entries use these icons where the UI shows them.
+- **POTA UI**: tree for **POTA** in Ham Tools; **Active Spots** and **Activate a Park** on the POTA screen use the new map/route-style icons; **POTA Recorder** still uses the built-in audio symbol.
+- **Build / Arduino**: the generated font fragment is `extra_font_awesome_icons_generated.h` (with a legacy `.inc` include fallback) so the sketch build can resolve the file reliably.
+- **CW School**: label cleanup; **Space** to replay; auto progression between levels and overlay text fix; exit from the school flow (mode 153) fixed.
+- **WiFi settings**: show/hide password works on the correct security tab.
+- **Account**: “link account” entry removed temporarily (pending a later design).
+
 ## Building locally
 
 See upstream [README.md](README.md) and `build.ps1` / `build.bat`. The web flasher is built automatically by GitHub Actions on every push to `fork-main`.
