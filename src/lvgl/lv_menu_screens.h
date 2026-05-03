@@ -21,12 +21,17 @@ extern int currentSelection;
 // Menu Data Structures
 // ============================================
 
-// Menu item structure for LVGL menus
+// Menu item structure for LVGL menus (LVGL 8.3.x — see extra_font_awesome_icons.h for FA + font docs)
 struct LVMenuItem {
     const char* icon;
     const char* title;
-    int target_mode;  // MenuMode enum value to switch to
+    int target_mode;           // MenuMode enum value to switch to
+    const lv_font_t* icon_font;  // NULL: Montserrat 24 + LV_SYMBOL_*; else UTF-8 + that font (e.g. ExtraFontAwesomeIcons)
 };
+
+// Montserrat symbol row / Font Awesome UTF-8 row (LVGL 8 font + label pattern; extra_font_awesome_icons.h)
+#define MENU_ITEM_LV(sym, title, mode)  { (sym), (title), (mode), NULL }
+#define MENU_ITEM_FA(utf8, title, mode) { (utf8), (title), (mode), &ExtraFontAwesomeIcons }
 
 // ============================================
 // Menu Data
@@ -35,104 +40,104 @@ struct LVMenuItem {
 
 // Main menu items - using LVGL symbols for modern look
 static const LVMenuItem mainMenuItems[] = {
-    {LV_SYMBOL_AUDIO, "CW", MODE_CW_MENU},
-    {LV_SYMBOL_PLAY, "Games", MODE_GAMES_MENU},
-    {LV_SYMBOL_DIRECTORY, "Ham Tools", MODE_HAM_TOOLS_MENU},
-    {LV_SYMBOL_SETTINGS, "Settings", MODE_SETTINGS_MENU}
+    MENU_ITEM_LV(LV_SYMBOL_AUDIO, "CW", MODE_CW_MENU),
+    MENU_ITEM_LV(LV_SYMBOL_PLAY, "Games", MODE_GAMES_MENU),
+    MENU_ITEM_LV(LV_SYMBOL_DIRECTORY, "Ham Tools", MODE_HAM_TOOLS_MENU),
+    MENU_ITEM_LV(LV_SYMBOL_SETTINGS, "Settings", MODE_SETTINGS_MENU)
 };
 #define MAIN_MENU_COUNT 4
 
 // CW submenu items
 static const LVMenuItem cwMenuItems[] = {
-    {LV_SYMBOL_EDIT, "Training", MODE_TRAINING_MENU},
-    {LV_SYMBOL_REFRESH, "Practice", MODE_PRACTICE},
-    {LV_SYMBOL_UPLOAD, "Vail Repeater", MODE_VAIL_REPEATER},
-    {LV_SYMBOL_ENVELOPE, "Morse Mailbox", MODE_MORSE_MAILBOX},
-    {LV_SYMBOL_AUDIO, "Morse Notes", MODE_MORSE_NOTES_LIBRARY},
-    {LV_SYMBOL_BLUETOOTH, "Bluetooth", MODE_BLUETOOTH_MENU},
-    {LV_SYMBOL_POWER, "Radio Output", MODE_RADIO_OUTPUT},
-    {LV_SYMBOL_SAVE, "CW Memories", MODE_CW_MEMORIES}
+    MENU_ITEM_FA(FA_EXTRA_SCROLL, "Training", MODE_TRAINING_MENU),
+    MENU_ITEM_LV(LV_SYMBOL_REFRESH, "Practice", MODE_PRACTICE),
+    MENU_ITEM_LV(LV_SYMBOL_UPLOAD, "Vail Repeater", MODE_VAIL_REPEATER),
+    MENU_ITEM_LV(LV_SYMBOL_ENVELOPE, "Morse Mailbox", MODE_MORSE_MAILBOX),
+    MENU_ITEM_LV(LV_SYMBOL_AUDIO, "Morse Notes", MODE_MORSE_NOTES_LIBRARY),
+    MENU_ITEM_LV(LV_SYMBOL_BLUETOOTH, "Bluetooth", MODE_BLUETOOTH_MENU),
+    MENU_ITEM_LV(LV_SYMBOL_POWER, "Radio Output", MODE_RADIO_OUTPUT),
+    MENU_ITEM_LV(LV_SYMBOL_SAVE, "CW Memories", MODE_CW_MEMORIES)
 };
 #define CW_MENU_COUNT 8
 
-// Training submenu items
+// Training submenu items (custom FA icons in extra_font_awesome_icons.c)
 static const LVMenuItem trainingMenuItems[] = {
-    {LV_SYMBOL_EDIT, "Vail Master", MODE_VAIL_MASTER},
-    {LV_SYMBOL_AUDIO, "Hear It Type It", MODE_HEAR_IT_MENU},
-    {LV_SYMBOL_SHUFFLE, "Vail CW School", MODE_CWSCHOOL},
-    {LV_SYMBOL_FILE, "CW Academy", MODE_CW_ACADEMY_TRACK_SELECT},
-    {LV_SYMBOL_SHUFFLE, "LICW Training", MODE_LICW_CAROUSEL_SELECT}
+    MENU_ITEM_FA(FA_EXTRA_GRADUATION_CAP, "Vail Master", MODE_VAIL_MASTER),
+    MENU_ITEM_FA(FA_EXTRA_ASSISTIVE_LISTENING, "Hear It Type It", MODE_HEAR_IT_MENU),
+    MENU_ITEM_FA(FA_EXTRA_SCHOOL, "Vail CW School", MODE_CWSCHOOL),
+    MENU_ITEM_FA(FA_EXTRA_GLOBE, "CW Academy", MODE_CW_ACADEMY_TRACK_SELECT),
+    MENU_ITEM_FA(FA_EXTRA_VIDEO, "LICW Training", MODE_LICW_CAROUSEL_SELECT)
 };
 #define TRAINING_MENU_COUNT 5
 
 // Games submenu items
 static const LVMenuItem gamesMenuItems[] = {
-    {LV_SYMBOL_PLAY, "Morse Shooter", MODE_MORSE_SHOOTER},
-    {LV_SYMBOL_LOOP, "Memory Chain", MODE_MORSE_MEMORY},
-    {LV_SYMBOL_AUDIO, "Spark Watch", MODE_SPARK_WATCH},
-    {LV_SYMBOL_FILE, "Story Time", MODE_STORY_TIME},
-    {LV_SYMBOL_CHARGE, "CW Speeder", MODE_CW_SPEEDER_SELECT}
+    MENU_ITEM_LV(LV_SYMBOL_PLAY, "Morse Shooter", MODE_MORSE_SHOOTER),
+    MENU_ITEM_LV(LV_SYMBOL_LOOP, "Memory Chain", MODE_MORSE_MEMORY),
+    MENU_ITEM_LV(LV_SYMBOL_AUDIO, "Spark Watch", MODE_SPARK_WATCH),
+    MENU_ITEM_LV(LV_SYMBOL_FILE, "Story Time", MODE_STORY_TIME),
+    MENU_ITEM_LV(LV_SYMBOL_CHARGE, "CW Speeder", MODE_CW_SPEEDER_SELECT)
 };
 #define GAMES_MENU_COUNT 5
 
 // Settings submenu items
 static const LVMenuItem settingsMenuItems[] = {
-    {LV_SYMBOL_HOME, "Device Settings", MODE_DEVICE_SETTINGS_MENU},
-    {LV_SYMBOL_AUDIO, "CW Settings", MODE_CW_SETTINGS}
+    MENU_ITEM_LV(LV_SYMBOL_HOME, "Device Settings", MODE_DEVICE_SETTINGS_MENU),
+    MENU_ITEM_LV(LV_SYMBOL_AUDIO, "CW Settings", MODE_CW_SETTINGS)
 };
 #define SETTINGS_MENU_COUNT 2
 
 // Device settings submenu items
 static const LVMenuItem deviceSettingsMenuItems[] = {
-    {LV_SYMBOL_WIFI, "WiFi", MODE_WIFI_SUBMENU},
-    {LV_SYMBOL_SETTINGS, "General", MODE_GENERAL_SUBMENU},
-    {LV_SYMBOL_BLUETOOTH, "Bluetooth", MODE_DEVICE_BT_SUBMENU},
-    {LV_SYMBOL_HOME, "System Info", MODE_SYSTEM_INFO}
+    MENU_ITEM_LV(LV_SYMBOL_WIFI, "WiFi", MODE_WIFI_SUBMENU),
+    MENU_ITEM_LV(LV_SYMBOL_SETTINGS, "General", MODE_GENERAL_SUBMENU),
+    MENU_ITEM_LV(LV_SYMBOL_BLUETOOTH, "Bluetooth", MODE_DEVICE_BT_SUBMENU),
+    MENU_ITEM_LV(LV_SYMBOL_HOME, "System Info", MODE_SYSTEM_INFO)
 };
 #define DEVICE_SETTINGS_COUNT 4
 
 // WiFi submenu items
 static const LVMenuItem wifiSubmenuItems[] = {
-    {LV_SYMBOL_WIFI, "WiFi Setup", MODE_WIFI_SETTINGS},
-    {LV_SYMBOL_EYE_CLOSE, "Web Password", MODE_WEB_PASSWORD_SETTINGS},
-    {LV_SYMBOL_DOWNLOAD, "Web Files", MODE_WEB_FILES_UPDATE}
+    MENU_ITEM_LV(LV_SYMBOL_WIFI, "WiFi Setup", MODE_WIFI_SETTINGS),
+    MENU_ITEM_LV(LV_SYMBOL_EYE_CLOSE, "Web Password", MODE_WEB_PASSWORD_SETTINGS),
+    MENU_ITEM_LV(LV_SYMBOL_DOWNLOAD, "Web Files", MODE_WEB_FILES_UPDATE)
 };
 #define WIFI_SUBMENU_COUNT 3
 
 // General submenu items
 static const LVMenuItem generalSubmenuItems[] = {
-    {LV_SYMBOL_CALL, "Callsign", MODE_CALLSIGN_SETTINGS},
-    {LV_SYMBOL_VOLUME_MAX, "Volume", MODE_VOLUME_SETTINGS},
-    {LV_SYMBOL_IMAGE, "Brightness", MODE_BRIGHTNESS_SETTINGS},
-    {LV_SYMBOL_EYE_OPEN, "UI Theme", MODE_THEME_SETTINGS}
+    MENU_ITEM_LV(LV_SYMBOL_CALL, "Callsign", MODE_CALLSIGN_SETTINGS),
+    MENU_ITEM_LV(LV_SYMBOL_VOLUME_MAX, "Volume", MODE_VOLUME_SETTINGS),
+    MENU_ITEM_LV(LV_SYMBOL_IMAGE, "Brightness", MODE_BRIGHTNESS_SETTINGS),
+    MENU_ITEM_LV(LV_SYMBOL_EYE_OPEN, "UI Theme", MODE_THEME_SETTINGS)
 };
 #define GENERAL_SUBMENU_COUNT 4
 
 // Ham Tools submenu items
 static const LVMenuItem hamToolsMenuItems[] = {
-    {LV_SYMBOL_SAVE, "QSO Logger", MODE_QSO_LOGGER_MENU},
-    {LV_SYMBOL_GPS, "POTA", MODE_POTA_MENU},
-    {LV_SYMBOL_LIST, "Band Plans", MODE_BAND_PLANS},
-    {LV_SYMBOL_REFRESH, "Band Conditions", MODE_PROPAGATION},
-    {LV_SYMBOL_CHARGE, "Antennas", MODE_ANTENNAS},
-    {LV_SYMBOL_FILE, "License Study", MODE_LICENSE_SELECT},
-    {LV_SYMBOL_ENVELOPE, "Summit Chat", MODE_SUMMIT_CHAT}
+    MENU_ITEM_LV(LV_SYMBOL_SAVE, "QSO Logger", MODE_QSO_LOGGER_MENU),
+    MENU_ITEM_LV(LV_SYMBOL_GPS, "POTA", MODE_POTA_MENU),
+    MENU_ITEM_LV(LV_SYMBOL_LIST, "Band Plans", MODE_BAND_PLANS),
+    MENU_ITEM_LV(LV_SYMBOL_REFRESH, "Band Conditions", MODE_PROPAGATION),
+    MENU_ITEM_LV(LV_SYMBOL_CHARGE, "Antennas", MODE_ANTENNAS),
+    MENU_ITEM_LV(LV_SYMBOL_FILE, "License Study", MODE_LICENSE_SELECT),
+    MENU_ITEM_LV(LV_SYMBOL_ENVELOPE, "Summit Chat", MODE_SUMMIT_CHAT)
 };
 #define HAM_TOOLS_COUNT 7
 
 // Bluetooth submenu items
 static const LVMenuItem bluetoothMenuItems[] = {
-    {LV_SYMBOL_KEYBOARD, "HID (Keyboard)", MODE_BT_HID},
-    {LV_SYMBOL_AUDIO, "MIDI", MODE_BT_MIDI}
+    MENU_ITEM_LV(LV_SYMBOL_KEYBOARD, "HID (Keyboard)", MODE_BT_HID),
+    MENU_ITEM_LV(LV_SYMBOL_AUDIO, "MIDI", MODE_BT_MIDI)
 };
 #define BLUETOOTH_MENU_COUNT 2
 
 // QSO Logger submenu items
 static const LVMenuItem qsoLoggerMenuItems[] = {
-    {LV_SYMBOL_PLUS, "New Log Entry", MODE_QSO_LOG_ENTRY},
-    {LV_SYMBOL_LIST, "View Logs", MODE_QSO_VIEW_LOGS},
-    {LV_SYMBOL_IMAGE, "Statistics", MODE_QSO_STATISTICS},
-    {LV_SYMBOL_SETTINGS, "Logger Settings", MODE_QSO_LOGGER_SETTINGS}
+    MENU_ITEM_LV(LV_SYMBOL_PLUS, "New Log Entry", MODE_QSO_LOG_ENTRY),
+    MENU_ITEM_LV(LV_SYMBOL_LIST, "View Logs", MODE_QSO_VIEW_LOGS),
+    MENU_ITEM_LV(LV_SYMBOL_IMAGE, "Statistics", MODE_QSO_STATISTICS),
+    MENU_ITEM_LV(LV_SYMBOL_SETTINGS, "Logger Settings", MODE_QSO_LOGGER_SETTINGS)
 };
 #define QSO_LOGGER_COUNT 4
 
@@ -339,10 +344,11 @@ lv_obj_t* createMenuScreen(const char* title, const LVMenuItem* items, int item_
         lv_obj_clear_flag(col, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_clear_flag(col, LV_OBJ_FLAG_SCROLLABLE);
 
-        // Icon (use symbol) - always use Montserrat for LVGL symbols
+        // Icon: Montserrat 24 for LV_SYMBOL_*; ExtraFontAwesomeIcons for MENU_ITEM_FA UTF-8 glyphs
         lv_obj_t* icon = lv_label_create(col);
         lv_label_set_text(icon, items[i].icon);
-        lv_obj_set_style_text_font(icon, &lv_font_montserrat_24, 0);  // Montserrat has LVGL symbols
+        const lv_font_t* icon_font = items[i].icon_font ? items[i].icon_font : &lv_font_montserrat_24;
+        lv_obj_set_style_text_font(icon, icon_font, 0);
         lv_obj_set_style_text_color(icon, LV_COLOR_TEXT_PRIMARY, 0);
 
         // Text - use theme font for menu labels

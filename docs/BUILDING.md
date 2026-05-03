@@ -52,7 +52,7 @@ Install via Arduino Library Manager:
 - **ESPAsyncWebServer** - `https://github.com/me-no-dev/ESPAsyncWebServer`
 - **AsyncTCP** - `https://github.com/me-no-dev/AsyncTCP` (dependency for ESPAsyncWebServer)
 
-**⚠️ LVGL Version:** This project requires LVGL 8.3.x. LVGL 9.x has breaking API changes and will not compile. If using Arduino Library Manager, ensure you install version 8.3.11 or similar 8.3.x version.
+**Custom Font Awesome menu font:** Regenerating is documented in **`docs/EXTRA_FONT_AWESOME_ICONS.md`**. Paste converter output into **`src/fonts/extra_font_awesome_icons_generated.inc`** only; keep **`extra_font_awesome_icons_shell.h`** and **`extra_font_awesome_icons.c`** unchanged.
 
 **Note:** This project uses a 4.0" ST7796S display (480×320) with LovyanGFX library instead of the older Adafruit ST7789 library.
 
