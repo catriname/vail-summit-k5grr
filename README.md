@@ -11,8 +11,10 @@ Flash the latest K5GRR build straight from your browser — no Arduino IDE, no d
 Chrome, Edge, or Opera on desktop required (Web Serial).
 
 ## What's different in this fork
+|  Direct Decoder |
+| ------------ |
+|  This fork uses a completely different decoder.  All testing is done with this decoder, adaptive not tested yet.  If not already set, go to Settings and verify it is set to Direct.  Adjust WPM if accuracy or rythm is a bit off. |
 
-- **Direct Decoder is the default** for new installs (see callout below).
 - **Vail repeater chat** sends as morse audio with an RX decoded row above the TX morse row.
 - **Sidetone audio** driven from Core 0 to eliminate underrun static.
 - **CW School** UI cleanup: dot status indicators, focus-handling fixes, completed-lesson styling.
