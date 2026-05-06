@@ -522,47 +522,192 @@ lv_obj_t* createScrollableList(lv_obj_t* parent, int height) {
  *   confirm_cb - Callback for Yes button
  *   cancel_cb - Callback for No button
  */
-lv_obj_t* createConfirmDialog(const char* title, const char* message, lv_event_cb_t confirm_cb, lv_event_cb_t cancel_cb) {
-    static const char* btns[] = {"Yes", "No", ""};
+// Saved indev group so dismissal can restore prior navigation context.
+static lv_group_t* s_confirm_prev_group = NULL;
+static lv_group_t* s_confirm_dialog_group = NULL;
+static lv_indev_t* s_confirm_modal_indevs[8];
+static int s_confirm_modal_indev_count = 0;
 
-    lv_obj_t* mbox = lv_msgbox_create(NULL, title, message, btns, false);
+struct ConfirmDialogContext {
+    lv_event_cb_t confirm_cb;
+    lv_event_cb_t cancel_cb;
+};
+
+static void closeConfirmDialog(lv_obj_t* backdrop) {
+    if (backdrop == NULL) return;
+
+    if (s_confirm_dialog_group != NULL) {
+        for (int i = 0; i < s_confirm_modal_indev_count; i++) {
+            if (s_confirm_modal_indevs[i] != NULL) {
+                lv_indev_set_group(s_confirm_modal_indevs[i], s_confirm_prev_group);
+            }
+        }
+        s_confirm_modal_indev_count = 0;
+        lv_group_del(s_confirm_dialog_group);
+        s_confirm_dialog_group = NULL;
+        s_confirm_prev_group = NULL;
+    }
+
+    ConfirmDialogContext* ctx = (ConfirmDialogContext*)lv_obj_get_user_data(backdrop);
+    if (ctx != NULL) {
+        delete ctx;
+        lv_obj_set_user_data(backdrop, NULL);
+    }
+
+    lv_obj_del(backdrop);
+}
+
+lv_obj_t* createConfirmDialog(const char* title, const char* message, lv_event_cb_t confirm_cb, lv_event_cb_t cancel_cb) {
+    // Fullscreen backdrop absorbs all clicks/keys outside dialog.
+    lv_obj_t* backdrop = lv_obj_create(lv_layer_top());
+    lv_obj_remove_style_all(backdrop);
+    lv_obj_set_size(backdrop, LV_HOR_RES, LV_VER_RES);
+    lv_obj_set_pos(backdrop, 0, 0);
+    lv_obj_clear_flag(backdrop, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(backdrop, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_style_bg_color(backdrop, lv_color_black(), 0);
+    lv_obj_set_style_bg_opa(backdrop, LV_OPA_50, 0);
+
+    ConfirmDialogContext* ctx = new ConfirmDialogContext();
+    ctx->confirm_cb = confirm_cb;
+    ctx->cancel_cb = cancel_cb;
+    lv_obj_set_user_data(backdrop, ctx);
+
+    lv_obj_add_event_cb(backdrop, [](lv_event_t* e) {
+        if (lv_event_get_target(e) != lv_event_get_current_target(e)) return;
+        lv_event_stop_processing(e);
+        lv_event_stop_bubbling(e);
+    }, LV_EVENT_ALL, NULL);
+
+    lv_obj_t* mbox = lv_msgbox_create(backdrop, title, message, NULL, false);
     lv_obj_center(mbox);
     lv_obj_add_style(mbox, getStyleMsgbox(), 0);
 
-    // Get button matrix and add to navigation
-    lv_obj_t* btns_obj = lv_msgbox_get_btns(mbox);
-    addNavigableWidget(btns_obj);
+    lv_obj_t* footer = lv_obj_create(mbox);
+    lv_obj_remove_style_all(footer);
+    lv_obj_set_size(footer, lv_pct(100), 60);
+    lv_obj_clear_flag(footer, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_flex_flow(footer, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(footer, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 
-    // Add event handler for button clicks
-    lv_obj_add_event_cb(mbox, [](lv_event_t* e) {
-        lv_obj_t* obj = lv_event_get_current_target(e);
-        const char* txt = lv_msgbox_get_active_btn_text(obj);
+    lv_obj_t* yes_btn = lv_obj_create(footer);
+    lv_obj_set_size(yes_btn, 100, 34);
+    lv_obj_add_flag(yes_btn, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_clear_flag(yes_btn, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color(yes_btn, LV_COLOR_BG_CARD, 0);
+    lv_obj_set_style_bg_color(yes_btn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
+    lv_obj_set_style_radius(yes_btn, 8, 0);
+    lv_obj_set_style_border_width(yes_btn, 1, 0);
+    lv_obj_set_style_border_color(yes_btn, LV_COLOR_BORDER_SUBTLE, 0);
+    lv_obj_set_style_border_width(yes_btn, 2, LV_STATE_FOCUSED);
+    lv_obj_set_style_border_color(yes_btn, LV_COLOR_ACCENT_PRIMARY, LV_STATE_FOCUSED);
+    lv_obj_t* yes_lbl = lv_label_create(yes_btn);
+    lv_label_set_text(yes_lbl, "Yes");
+    lv_obj_set_style_text_color(yes_lbl, LV_COLOR_TEXT_PRIMARY, 0);
+    lv_obj_center(yes_lbl);
 
-        if (txt != NULL) {
-            if (strcmp(txt, "Yes") == 0) {
-                // Get confirm callback from user data
-                void** cbs = (void**)lv_obj_get_user_data(obj);
-                if (cbs != NULL && cbs[0] != NULL) {
-                    ((lv_event_cb_t)cbs[0])(e);
-                }
-            } else if (strcmp(txt, "No") == 0) {
-                // Get cancel callback from user data
-                void** cbs = (void**)lv_obj_get_user_data(obj);
-                if (cbs != NULL && cbs[1] != NULL) {
-                    ((lv_event_cb_t)cbs[1])(e);
+    lv_obj_t* no_btn = lv_obj_create(footer);
+    lv_obj_set_size(no_btn, 100, 34);
+    lv_obj_add_flag(no_btn, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_clear_flag(no_btn, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color(no_btn, LV_COLOR_BG_CARD_ALT, 0);
+    lv_obj_set_style_bg_color(no_btn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
+    lv_obj_set_style_radius(no_btn, 8, 0);
+    lv_obj_set_style_border_width(no_btn, 1, 0);
+    lv_obj_set_style_border_color(no_btn, LV_COLOR_BORDER_SUBTLE, 0);
+    lv_obj_set_style_border_width(no_btn, 2, LV_STATE_FOCUSED);
+    lv_obj_set_style_border_color(no_btn, LV_COLOR_ACCENT_PRIMARY, LV_STATE_FOCUSED);
+    lv_obj_t* no_lbl = lv_label_create(no_btn);
+    lv_label_set_text(no_lbl, "No");
+    lv_obj_set_style_text_color(no_lbl, LV_COLOR_TEXT_PRIMARY, 0);
+    lv_obj_center(no_lbl);
+
+    auto activate_yes = [](lv_event_t* e) {
+        lv_obj_t* btn = lv_event_get_target(e);
+        lv_obj_t* backdrop_local = lv_obj_get_parent(lv_obj_get_parent(lv_obj_get_parent(btn)));
+        ConfirmDialogContext* ctx_local = (ConfirmDialogContext*)lv_obj_get_user_data(backdrop_local);
+        if (ctx_local != NULL && ctx_local->confirm_cb != NULL) {
+            ctx_local->confirm_cb(e);
+        }
+        closeConfirmDialog(backdrop_local);
+        lv_indev_t* indev = getLVGLKeypad();
+        if (indev != NULL) lv_indev_wait_release(indev);
+        lv_event_stop_processing(e);
+        lv_event_stop_bubbling(e);
+    };
+
+    auto activate_no = [](lv_event_t* e) {
+        lv_obj_t* btn = lv_event_get_target(e);
+        lv_obj_t* backdrop_local = lv_obj_get_parent(lv_obj_get_parent(lv_obj_get_parent(btn)));
+        ConfirmDialogContext* ctx_local = (ConfirmDialogContext*)lv_obj_get_user_data(backdrop_local);
+        if (ctx_local != NULL && ctx_local->cancel_cb != NULL) {
+            ctx_local->cancel_cb(e);
+        }
+        closeConfirmDialog(backdrop_local);
+        lv_indev_t* indev = getLVGLKeypad();
+        if (indev != NULL) lv_indev_wait_release(indev);
+        lv_event_stop_processing(e);
+        lv_event_stop_bubbling(e);
+    };
+
+    lv_obj_add_event_cb(yes_btn, activate_yes, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(no_btn, activate_no, LV_EVENT_CLICKED, NULL);
+
+    // Key handling: arrows switch focus, ENTER selects, ESC cancels.
+    lv_obj_add_event_cb(yes_btn, [](lv_event_t* e) {
+        if (lv_event_get_code(e) != LV_EVENT_KEY) return;
+        uint32_t key = lv_event_get_key(e);
+        if (key == LV_KEY_RIGHT || key == LV_KEY_DOWN) {
+            if (s_confirm_dialog_group != NULL) {
+                lv_group_focus_next(s_confirm_dialog_group);
+            }
+            lv_event_stop_processing(e);
+        } else if (key == LV_KEY_ENTER) {
+            lv_event_send(lv_event_get_target(e), LV_EVENT_CLICKED, NULL);
+        } else if (key == LV_KEY_ESC) {
+            if (s_confirm_dialog_group != NULL) {
+                lv_group_focus_next(s_confirm_dialog_group);
+                lv_obj_t* focused = lv_group_get_focused(s_confirm_dialog_group);
+                if (focused != NULL) {
+                    lv_event_send(focused, LV_EVENT_CLICKED, NULL);
                 }
             }
-            lv_msgbox_close(obj);
         }
-    }, LV_EVENT_VALUE_CHANGED, NULL);
+    }, LV_EVENT_KEY, NULL);
 
-    // Store callbacks in user data
-    static void* callbacks[2];
-    callbacks[0] = (void*)confirm_cb;
-    callbacks[1] = (void*)cancel_cb;
-    lv_obj_set_user_data(mbox, callbacks);
+    lv_obj_add_event_cb(no_btn, [](lv_event_t* e) {
+        if (lv_event_get_code(e) != LV_EVENT_KEY) return;
+        uint32_t key = lv_event_get_key(e);
+        if (key == LV_KEY_LEFT || key == LV_KEY_UP) {
+            if (s_confirm_dialog_group != NULL) {
+                lv_group_focus_prev(s_confirm_dialog_group);
+            }
+            lv_event_stop_processing(e);
+        } else if (key == LV_KEY_ENTER || key == LV_KEY_ESC) {
+            lv_event_send(lv_event_get_target(e), LV_EVENT_CLICKED, NULL);
+        }
+    }, LV_EVENT_KEY, NULL);
 
-    return mbox;
+    // Private modal group prevents background navigation drift.
+    s_confirm_prev_group = getLVGLInputGroup();
+    s_confirm_dialog_group = lv_group_create();
+    lv_group_add_obj(s_confirm_dialog_group, yes_btn);
+    lv_group_add_obj(s_confirm_dialog_group, no_btn);
+    lv_group_focus_obj(no_btn);  // default safe option
+
+    // Attach all keypad/encoder input devices to modal group.
+    s_confirm_modal_indev_count = 0;
+    lv_indev_t* indev = lv_indev_get_next(NULL);
+    while (indev != NULL && s_confirm_modal_indev_count < 8) {
+        lv_indev_type_t indev_type = lv_indev_get_type(indev);
+        if (indev_type == LV_INDEV_TYPE_KEYPAD || indev_type == LV_INDEV_TYPE_ENCODER) {
+            lv_indev_set_group(indev, s_confirm_dialog_group);
+            s_confirm_modal_indevs[s_confirm_modal_indev_count++] = indev;
+        }
+        indev = lv_indev_get_next(indev);
+    }
+
+    return backdrop;
 }
 
 // ============================================

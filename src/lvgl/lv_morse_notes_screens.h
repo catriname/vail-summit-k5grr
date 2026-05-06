@@ -15,6 +15,7 @@
 // Forward declarations
 void onLVGLMenuSelect(int menuItem);
 void getPaddleState(bool* dit, bool* dah);  // From task_manager.h
+void onLVGLBackNavigation();
 
 // ===================================
 // MORSE NOTES - LVGL UI SCREENS
@@ -115,6 +116,26 @@ static void mnLibraryListNavHandler(lv_event_t* e) {
 }
 
 /**
+ * List screen-level key handler (ensures ESC works even when empty).
+ */
+static void mnListScreenKeyHandler(lv_event_t* e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code != LV_EVENT_KEY) return;
+
+    uint32_t key = lv_event_get_key(e);
+    if (key == LV_KEY_ESC) {
+        onLVGLBackNavigation();
+        lv_event_stop_processing(e);
+        return;
+    }
+
+    if (key == LV_KEY_NEXT) {
+        lv_event_stop_processing(e);
+        return;
+    }
+}
+
+/**
  * List item click handler
  */
 static void mnLibraryItemClick(lv_event_t* e) {
@@ -165,9 +186,8 @@ lv_obj_t* createMorseNotesLibraryScreen() {
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t* title = lv_label_create(header);
-    lv_label_set_text(title, "Morse Notes");
-    lv_obj_set_style_text_font(title, getThemeFonts()->font_input, 0);
-    lv_obj_set_style_text_color(title, LV_COLOR_TEXT_PRIMARY, 0);
+    lv_label_set_text(title, "MORSE NOTES");
+    lv_obj_add_style(title, getStyleLabelTitle(), 0);
     lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
 
     lv_obj_t* menu_container = lv_obj_create(screen);
@@ -210,21 +230,6 @@ lv_obj_t* createMorseNotesLibraryScreen() {
     }, LV_EVENT_CLICKED, nullptr);
     lv_obj_add_event_cb(new_btn, linear_nav_handler, LV_EVENT_KEY, nullptr);
     addNavigableWidget(new_btn);
-
-    lv_obj_t* settings_btn = lv_btn_create(menu_container);
-    lv_obj_set_size(settings_btn, 350, 55);
-    lv_obj_set_style_bg_color(settings_btn, LV_COLOR_BORDER_CARD, 0);
-    lv_obj_set_style_bg_color(settings_btn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
-    lv_obj_set_style_radius(settings_btn, 10, 0);
-    lv_obj_t* settings_lbl = lv_label_create(settings_btn);
-    lv_label_set_text(settings_lbl, LV_SYMBOL_SETTINGS " Settings");
-    lv_obj_set_style_text_font(settings_lbl, getThemeFonts()->font_input, 0);
-    lv_obj_center(settings_lbl);
-    lv_obj_add_event_cb(settings_btn, [](lv_event_t* e) {
-        onLVGLMenuSelect(MODE_MORSE_NOTES_SETTINGS);
-    }, LV_EVENT_CLICKED, nullptr);
-    lv_obj_add_event_cb(settings_btn, linear_nav_handler, LV_EVENT_KEY, nullptr);
-    addNavigableWidget(settings_btn);
 
     lv_obj_t* footer = lv_label_create(screen);
     lv_label_set_text(footer, "Arrows Navigate   ENTER Select   ESC Back");
@@ -276,10 +281,36 @@ lv_obj_t* createMorseNotesListScreen() {
     mnLibraryItemCount = 0;
 
     if (count == 0) {
-        lv_obj_t* empty = lv_label_create(list);
-        lv_label_set_text(empty, "No recordings yet.\nUse New on the Morse Notes menu.");
-        lv_obj_set_style_text_align(empty, LV_TEXT_ALIGN_CENTER, 0);
-        lv_obj_center(empty);
+        lv_obj_t* empty_card = lv_obj_create(list);
+        lv_obj_set_size(empty_card, 430, 125);
+        applyCardStyle(empty_card);
+        lv_obj_clear_flag(empty_card, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_set_style_radius(empty_card, 10, 0);
+        lv_obj_set_style_pad_all(empty_card, 14, 0);
+        lv_obj_set_layout(empty_card, LV_LAYOUT_FLEX);
+        lv_obj_set_flex_flow(empty_card, LV_FLEX_FLOW_COLUMN);
+        lv_obj_set_flex_align(empty_card, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        lv_obj_set_style_pad_row(empty_card, 8, 0);
+
+        lv_obj_t* empty_icon = lv_label_create(empty_card);
+        lv_label_set_text(empty_icon, LV_SYMBOL_AUDIO);
+        lv_obj_set_style_text_color(empty_icon, LV_COLOR_TEXT_SECONDARY, 0);
+        lv_obj_set_style_text_font(empty_icon, getThemeFonts()->font_large, 0);
+
+        lv_obj_t* empty_title = lv_label_create(empty_card);
+        lv_label_set_text(empty_title, "No recordings yet");
+        lv_obj_set_style_text_font(empty_title, getThemeFonts()->font_input, 0);
+        lv_obj_set_style_text_color(empty_title, LV_COLOR_TEXT_PRIMARY, 0);
+
+        lv_obj_t* empty_help = lv_label_create(empty_card);
+        lv_label_set_text(empty_help, "Press ESC for menu, then select New to record.");
+        lv_obj_set_style_text_color(empty_help, LV_COLOR_TEXT_SECONDARY, 0);
+        lv_obj_set_style_text_font(empty_help, getThemeFonts()->font_body, 0);
+        lv_obj_set_style_text_align(empty_help, LV_TEXT_ALIGN_CENTER, 0);
+
+        // Make empty state keyboard-focusable so ESC back still works.
+        lv_obj_add_event_cb(empty_card, mnListScreenKeyHandler, LV_EVENT_KEY, nullptr);
+        addNavigableWidget(empty_card);
     } else {
         // Create recording items
         for (int i = 0; i < count && i < MN_MAX_RECORDINGS; i++) {
@@ -333,6 +364,7 @@ lv_obj_t* createMorseNotesListScreen() {
             // Click handler
             lv_obj_add_event_cb(item, mnLibraryItemClick, LV_EVENT_CLICKED, nullptr);
             lv_obj_add_event_cb(item, mnLibraryListNavHandler, LV_EVENT_KEY, nullptr);
+            lv_obj_add_event_cb(item, mnListScreenKeyHandler, LV_EVENT_KEY, nullptr);
             addNavigableWidget(item);
             mnLibraryItems[mnLibraryItemCount++] = item;
         }
@@ -564,6 +596,13 @@ static void mnSaveInputKeyHandler(lv_event_t* e) {
         return;
     }
 
+    // ENTER from title field saves immediately
+    if (key == LV_KEY_ENTER) {
+        mnSaveBtnClick(e);
+        lv_event_stop_processing(e);
+        return;
+    }
+
     // Block TAB
     if (key == LV_KEY_NEXT) {
         lv_event_stop_processing(e);
@@ -610,6 +649,19 @@ static void mnSaveDialogBtnNavHandler(lv_event_t* e) {
             lv_group_focus_obj(mnSaveSaveBtn);
         } else if (target == mnSaveSaveBtn) {
             lv_group_focus_obj(mnSaveDiscardBtn);
+        }
+        lv_event_stop_processing(e);
+        return;
+    }
+
+    // Make ENTER activation explicit for keypad flow
+    if (key == LV_KEY_ENTER) {
+        if (target == mnSavePreviewBtn) {
+            mnPreviewBtnClick(e);
+        } else if (target == mnSaveSaveBtn) {
+            mnSaveBtnClick(e);
+        } else if (target == mnSaveDiscardBtn) {
+            mnDiscardBtnClick(e);
         }
         lv_event_stop_processing(e);
         return;
@@ -1204,7 +1256,8 @@ lv_obj_t* createMorseNotesPlaybackScreen() {
     // Play button
     mnPlaybackPlayBtn = lv_btn_create(controls);
     lv_obj_set_size(mnPlaybackPlayBtn, 120, 50);
-    lv_obj_set_style_bg_color(mnPlaybackPlayBtn, LV_COLOR_SUCCESS, 0);
+    lv_obj_set_style_bg_color(mnPlaybackPlayBtn, LV_COLOR_BG_CARD, 0);
+    lv_obj_set_style_bg_color(mnPlaybackPlayBtn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
     lv_obj_t* play_lbl = lv_label_create(mnPlaybackPlayBtn);
     lv_label_set_text(play_lbl, LV_SYMBOL_PLAY " Play");
     lv_obj_center(play_lbl);
@@ -1216,7 +1269,8 @@ lv_obj_t* createMorseNotesPlaybackScreen() {
     // Speed button
     mnPlaybackSpeedBtn = lv_btn_create(controls);
     lv_obj_set_size(mnPlaybackSpeedBtn, 120, 50);
-    lv_obj_set_style_bg_color(mnPlaybackSpeedBtn, LV_COLOR_ACCENT_MAGENTA, 0);
+    lv_obj_set_style_bg_color(mnPlaybackSpeedBtn, LV_COLOR_BG_CARD_ALT, 0);
+    lv_obj_set_style_bg_color(mnPlaybackSpeedBtn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
     mnPlaybackSpeedLabel = lv_label_create(mnPlaybackSpeedBtn);
     lv_label_set_text(mnPlaybackSpeedLabel, LV_SYMBOL_UP LV_SYMBOL_DOWN " 1.00x");
     lv_obj_center(mnPlaybackSpeedLabel);
@@ -1229,6 +1283,7 @@ lv_obj_t* createMorseNotesPlaybackScreen() {
     mnPlaybackDeleteBtn = lv_btn_create(controls);
     lv_obj_set_size(mnPlaybackDeleteBtn, 120, 50);
     lv_obj_set_style_bg_color(mnPlaybackDeleteBtn, LV_COLOR_ERROR, 0);
+    lv_obj_set_style_bg_color(mnPlaybackDeleteBtn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
     lv_obj_t* del_lbl = lv_label_create(mnPlaybackDeleteBtn);
     lv_label_set_text(del_lbl, LV_SYMBOL_TRASH " Delete");
     lv_obj_center(del_lbl);
@@ -1281,7 +1336,6 @@ void cleanupMorseNotesPlaybackScreen() {
 // Extern declarations for settings functions
 extern void saveCWSettings();
 extern int getKeyAccelerationStep();
-extern void onLVGLBackNavigation();
 extern void setCwKeyTypeFromInt(int keyType);
 extern void beep(int frequency, int duration);
 
