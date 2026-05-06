@@ -2657,6 +2657,14 @@ lv_obj_t* createVailRepeaterScreen() {
     lv_obj_set_style_text_font(vail_chat_room_label, getThemeFonts()->font_small, 0);
     lv_obj_set_pos(vail_chat_room_label, 10, 4);
 
+    vail_wpm_label = lv_label_create(vail_chat_panel);
+    char wpm_str[16];
+    snprintf(wpm_str, sizeof(wpm_str), "WPM: %d", cwSpeed);
+    lv_label_set_text(vail_wpm_label, wpm_str);
+    lv_obj_set_style_text_color(vail_wpm_label, LV_COLOR_TEXT_SECONDARY, 0);
+    lv_obj_set_style_text_font(vail_wpm_label, getThemeFonts()->font_small, 0);
+    lv_obj_align(vail_wpm_label, LV_ALIGN_TOP_RIGHT, -10, 4);
+
     // Chat message history (~60% of content height)
     int chat_header_h = 20;
     int input_row_h   = 38;
@@ -2798,12 +2806,12 @@ lv_obj_t* createVailRepeaterScreen() {
     lv_obj_set_style_text_color(vail_footer_label, LV_COLOR_WARNING, 0);
     lv_obj_set_style_text_font(vail_footer_label, getThemeFonts()->font_small, 0);
 
-    vail_wpm_label = lv_label_create(footer);
-    char wpm_str[16];
-    snprintf(wpm_str, sizeof(wpm_str), "WPM: %d", cwSpeed);
-    lv_label_set_text(vail_wpm_label, wpm_str);
-    lv_obj_set_style_text_color(vail_wpm_label, LV_COLOR_ACCENT_PRIMARY, 0);
-    lv_obj_set_style_text_font(vail_wpm_label, getThemeFonts()->font_small, 0);
+    lv_obj_t* char_limit_label = lv_label_create(footer);
+    char limit_str[24];
+    snprintf(limit_str, sizeof(limit_str), "Max: %d chars", VAIL_MAX_INPUT_LEN);
+    lv_label_set_text(char_limit_label, limit_str);
+    lv_obj_set_style_text_color(char_limit_label, LV_COLOR_TEXT_SECONDARY, 0);
+    lv_obj_set_style_text_font(char_limit_label, getThemeFonts()->font_small, 0);
 
     // Invisible focus container for keyboard input
     lv_obj_t* focus_container = lv_obj_create(screen);

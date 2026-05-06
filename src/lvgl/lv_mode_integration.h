@@ -626,6 +626,12 @@ bool handleGlobalHotkey(char key) {
  * Called when user selects a menu item
  * All modes are handled by LVGL - no legacy fallback
  */
+static void playAlertChirp() {
+    // Distinct UI alert sound (avoid Morse-like single short tones).
+    beep(300, 120);
+    beep(180, 140);
+}
+
 void onLVGLMenuSelect(int target_mode) {
     Serial.printf("[ModeIntegration] Menu selected mode: %d\n", target_mode);
 
@@ -636,7 +642,7 @@ void onLVGLMenuSelect(int target_mode) {
 
         // Check requirements: WiFi and SD card
         if (!WiFi.isConnected()) {
-            beep(400, 200);  // Error beep
+            playAlertChirp();
             Serial.println("[ModeIntegration] Web Files update requires WiFi");
             createAlertDialog("WiFi Required",
                 "Please connect to WiFi\nfirst to download web files.");
@@ -646,7 +652,7 @@ void onLVGLMenuSelect(int target_mode) {
             initSDCard();
         }
         if (!sdCardAvailable) {
-            beep(400, 200);  // Error beep
+            playAlertChirp();
             Serial.println("[ModeIntegration] Web Files update requires SD card");
             createAlertDialog("SD Card Required",
                 "Please insert an SD card\nto store web files.");
@@ -667,7 +673,7 @@ void onLVGLMenuSelect(int target_mode) {
         }
         // If still not available, show error and don't navigate
         if (!sdCardAvailable) {
-            beep(400, 200);  // Error beep
+            playAlertChirp();
             Serial.println("[ModeIntegration] QSO Logger requires SD card");
 
             createAlertDialog("SD Card Required",
