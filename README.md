@@ -39,6 +39,12 @@ Chrome, Edge, or Opera on desktop required (Web Serial).
 - **WiFi settings**: show/hide password works on the correct security tab.
 - **Account**: “link account” entry removed temporarily (pending a later design).
 
+## Notes for v0.2.x micro releases
+
+- **v0.2.2**: Firebase availability gating — features that depend on the cloud backend hide cleanly when keys aren't present. Includes Morse Mailbox fixes.
+- **v0.2.3**: Morse Notes polish — menu flow now matches the standard navigation pattern, with refinements to modal interactions and widget behavior.
+- **v0.2.4**: Vail Repeater chat header metadata cleanup and alert/feedback improvements.
+
 ## Building locally
 
 See upstream [README.md](README.md) and `build.ps1` / `build.bat`. The web flasher is built automatically by GitHub Actions on every push to `fork-main`.
