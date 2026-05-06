@@ -11,12 +11,10 @@
 #include "lv_widgets_summit.h"
 #include "lv_screen_manager.h"
 #include "../core/config.h"
+#include "../core/firebase_availability.h"
 #include "../core/modes.h"
 #include "../network/cwschool_link.h"
 #include "../network/internet_check.h"
-
-// TODO: Set true when CW School account link flow is ready for this build.
-static const bool CWSCHOOL_LINK_ACCOUNT_ENABLED = false;
 
 // Forward declarations for mode switching
 extern void setCurrentModeFromInt(int mode);
@@ -474,7 +472,7 @@ lv_obj_t* createCWSchoolAccountScreen() {
         lv_obj_add_event_cb(unlink_btn, cwschool_unlink_confirm, LV_EVENT_CLICKED, NULL);
         lv_obj_add_event_cb(unlink_btn, linear_nav_handler, LV_EVENT_KEY, NULL);
         addNavigableWidget(unlink_btn);
-    } else if (CWSCHOOL_LINK_ACCOUNT_ENABLED) {
+    } else if (cwschoolFirebaseConfigured()) {
         lv_obj_t* link_btn = lv_btn_create(screen);
         lv_obj_set_size(link_btn, 200, 50);
         lv_obj_align(link_btn, LV_ALIGN_BOTTOM_MID, 0, -60);
@@ -512,7 +510,7 @@ lv_obj_t* createCWSchoolAccountScreen() {
     lv_obj_t* footer = lv_label_create(screen);
     lv_label_set_text(footer,
                        isCWSchoolLinked() ? "ENTER Unlink   ESC Back"
-                                          : (CWSCHOOL_LINK_ACCOUNT_ENABLED ? "ENTER Link   ESC Back" : "ESC Back"));
+                                          : (cwschoolFirebaseConfigured() ? "ENTER Link   ESC Back" : "ESC Back"));
     lv_obj_set_style_text_font(footer, getThemeFonts()->font_body, 0);
     lv_obj_set_style_text_color(footer, LV_COLOR_WARNING, 0);
     lv_obj_align(footer, LV_ALIGN_BOTTOM_MID, 0, -5);
@@ -569,8 +567,8 @@ lv_obj_t* createCWSchoolMenuScreen() {
     lv_obj_set_style_pad_row(menu_container, 15, 0);
     lv_obj_clear_flag(menu_container, LV_OBJ_FLAG_SCROLLABLE);
 
-    // TODO: Link Account row appears when not linked and CWSCHOOL_LINK_ACCOUNT_ENABLED is true.
-    if (isCWSchoolLinked() || CWSCHOOL_LINK_ACCOUNT_ENABLED) {
+    // Link Account row only when a real CW School Firebase key is available (not fork placeholder build).
+    if (isCWSchoolLinked() || cwschoolFirebaseConfigured()) {
         lv_obj_t* account_btn = lv_btn_create(menu_container);
         lv_obj_set_size(account_btn, 350, 55);
         lv_obj_set_style_bg_color(account_btn, LV_COLOR_BG_CARD, 0);
@@ -677,8 +675,7 @@ bool handleCWSchoolMode(int mode) {
             break;
 
         case MODE_CWSCHOOL_LINK:
-            if (!CWSCHOOL_LINK_ACCOUNT_ENABLED) {
-                // TODO: createCWSchoolLinkScreen() when enabled
+            if (!cwschoolFirebaseConfigured()) {
                 screen = createCWSchoolMenuScreen();
                 break;
             }

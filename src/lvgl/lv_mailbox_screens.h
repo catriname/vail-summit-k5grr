@@ -11,12 +11,14 @@
 #include "lv_widgets_summit.h"
 #include "lv_screen_manager.h"
 #include "../core/config.h"
+#include "../core/firebase_availability.h"
 #include "../core/modes.h"
 #include "../network/morse_mailbox.h"
 #include "../network/internet_check.h"
 
 // Forward declarations for mode switching
 extern void onLVGLMenuSelect(int target_mode);  // Proper navigation with screen loading
+lv_obj_t* createCWMenuScreen();
 
 // ============================================
 // Screen State
@@ -1798,6 +1800,15 @@ void cleanupMailboxLinkScreen() {
  */
 bool handleMailboxMode(int mode) {
     lv_obj_t* screen = NULL;
+
+    if (!morseMailboxFirebaseConfigured()) {
+        screen = createCWMenuScreen();
+        if (screen) {
+            loadScreen(screen, SCREEN_ANIM_FADE);
+            return true;
+        }
+        return false;
+    }
 
     switch (mode) {
         case MODE_MORSE_MAILBOX:

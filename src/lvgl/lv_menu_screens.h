@@ -13,6 +13,7 @@
 #include "lv_screen_manager.h"
 #include "../core/config.h"
 #include "../core/modes.h"
+#include "../core/firebase_availability.h"
 
 // Forward declarations from main file
 extern int currentSelection;
@@ -222,8 +223,8 @@ lv_obj_t* createHeader(lv_obj_t* parent, const char* title) {
     lv_obj_set_style_text_font(mailbox_status_icon, &lv_font_montserrat_20, 0);
     lv_obj_set_style_text_color(mailbox_status_icon, LV_COLOR_ACCENT_PRIMARY, 0);
     lv_obj_align(mailbox_status_icon, LV_ALIGN_RIGHT_MID, -85, 0);
-    // Hide by default - only show when there are unread messages
-    if (!isMailboxLinked() || !hasUnreadMailboxMessages()) {
+    // Hide by default - only show when there are unread messages (requires Firebase key)
+    if (!morseMailboxFirebaseConfigured() || !isMailboxLinked() || !hasUnreadMailboxMessages()) {
         lv_obj_add_flag(mailbox_status_icon, LV_OBJ_FLAG_HIDDEN);
     }
 
@@ -279,7 +280,7 @@ void updateMailboxStatusIcon() {
         return;  // No icon to update or icon was deleted
     }
 
-    if (isMailboxLinked() && hasUnreadMailboxMessages()) {
+    if (morseMailboxFirebaseConfigured() && isMailboxLinked() && hasUnreadMailboxMessages()) {
         lv_obj_clear_flag(mailbox_status_icon, LV_OBJ_FLAG_HIDDEN);
     } else {
         lv_obj_add_flag(mailbox_status_icon, LV_OBJ_FLAG_HIDDEN);
@@ -402,7 +403,15 @@ lv_obj_t* createMainMenuScreen() {
  * Create CW menu screen
  */
 lv_obj_t* createCWMenuScreen() {
-    return createMenuScreen("CW", cwMenuItems, CW_MENU_COUNT);
+    static LVMenuItem filtered[CW_MENU_COUNT];
+    int n = 0;
+    for (int i = 0; i < CW_MENU_COUNT; i++) {
+        if (cwMenuItems[i].target_mode == MODE_MORSE_MAILBOX && !morseMailboxFirebaseConfigured()) {
+            continue;
+        }
+        filtered[n++] = cwMenuItems[i];
+    }
+    return createMenuScreen("CW", filtered, n);
 }
 
 /*
