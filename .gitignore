@@ -1,5 +1,6 @@
 # IDE and editor directories
 .claude/
+.cursor/
 .vscode/
 .idea/
 .vs/
