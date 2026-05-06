@@ -408,7 +408,7 @@ The following ESP32-S3 Feather pins are **NOT used** and available for expansion
 
 ## References
 
-- **Main Firmware:** [vail-summit.ino](../vail-summit.ino)
+- **Main Firmware:** [vail-summit-k5grr.ino](../vail-summit-k5grr.ino)
 - **Hardware Config:** [src/core/config.h](../src/core/config.h)
 - **Hardware Init:** [src/core/hardware_init.h](../src/core/hardware_init.h)
 - **Full Documentation:** [CLAUDE.md](../CLAUDE.md)

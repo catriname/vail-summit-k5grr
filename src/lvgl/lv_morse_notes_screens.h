@@ -2,6 +2,8 @@
 #define LV_MORSE_NOTES_SCREENS_H
 
 #include "lv_screen_manager.h"
+#include "lv_theme_summit.h"
+#include "lv_widgets_summit.h"
 #include "../core/config.h"
 #include "../core/modes.h"
 #include "../morse_notes/morse_notes_types.h"
@@ -19,14 +21,13 @@ void getPaddleState(bool* dit, bool* dah);  // From task_manager.h
 // ===================================
 
 // Screen state variables
-static lv_obj_t* mnLibraryScreen = nullptr;
+static lv_obj_t* mnNotesLandingScreen = nullptr;
+static lv_obj_t* mnNotesListScreen = nullptr;
 static lv_obj_t* mnRecordScreen = nullptr;
 static lv_obj_t* mnPlaybackScreen = nullptr;
 static lv_obj_t* mnSettingsScreen = nullptr;
 
-// Library screen widgets
-static lv_obj_t* mnLibraryHeaderBtns[2] = {nullptr, nullptr};
-static int mnLibraryHeaderBtnCount = 2;
+// List screen widgets
 static lv_obj_t* mnLibraryItems[MN_MAX_RECORDINGS];
 static int mnLibraryItemCount = 0;
 static lv_obj_t* mnLibraryList = nullptr;
@@ -79,51 +80,6 @@ extern void (*morseNotesKeyCallback)(bool keyDown, unsigned long timestamp);
 // ===================================
 
 /**
- * Header navigation (Settings / +New buttons)
- */
-static void mnLibraryHeaderNavHandler(lv_event_t* e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t* target = lv_event_get_target(e);
-
-    if (code != LV_EVENT_KEY) return;
-
-    uint32_t key = lv_event_get_key(e);
-
-    // Block TAB
-    if (key == LV_KEY_NEXT) {
-        lv_event_stop_processing(e);
-        return;
-    }
-
-    // Find current button index
-    int currentIndex = -1;
-    for (int i = 0; i < mnLibraryHeaderBtnCount; i++) {
-        if (mnLibraryHeaderBtns[i] == target) {
-            currentIndex = i;
-            break;
-        }
-    }
-
-    if (currentIndex < 0) return;
-
-    // LEFT/RIGHT navigation
-    if (key == LV_KEY_LEFT && currentIndex > 0) {
-        lv_group_focus_obj(mnLibraryHeaderBtns[currentIndex - 1]);
-        lv_event_stop_processing(e);
-    }
-    else if (key == LV_KEY_RIGHT && currentIndex < mnLibraryHeaderBtnCount - 1) {
-        lv_group_focus_obj(mnLibraryHeaderBtns[currentIndex + 1]);
-        lv_event_stop_processing(e);
-    }
-    // DOWN to first list item
-    else if (key == LV_KEY_DOWN && mnLibraryItemCount > 0) {
-        lv_group_focus_obj(mnLibraryItems[0]);
-        lv_obj_scroll_to_view(mnLibraryItems[0], LV_ANIM_ON);
-        lv_event_stop_processing(e);
-    }
-}
-
-/**
  * List navigation
  */
 static void mnLibraryListNavHandler(lv_event_t* e) {
@@ -156,12 +112,6 @@ static void mnLibraryListNavHandler(lv_event_t* e) {
     }
 
     if (currentIndex < 0) return;
-
-    // UP from first item goes to last header button
-    if (key == LV_KEY_UP && currentIndex == 0) {
-        lv_group_focus_obj(mnLibraryHeaderBtns[mnLibraryHeaderBtnCount - 1]);
-        lv_event_stop_processing(e);
-    }
 }
 
 /**
@@ -196,64 +146,121 @@ static String formatTimestamp(unsigned long timestamp) {
 }
 
 /**
- * Create library screen
+ * Morse Notes landing menu (same pattern as Vail CW School landing).
  */
 lv_obj_t* createMorseNotesLibraryScreen() {
     clearNavigationGroup();
 
-    // Load library
+    lv_obj_t* screen = createScreen();
+    applyScreenStyle(screen);
+    mnNotesLandingScreen = screen;
+
+    createCompactStatusBar(screen);
+
+    lv_obj_t* header = lv_obj_create(screen);
+    lv_obj_set_size(header, LV_PCT(100), 50);
+    lv_obj_align(header, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_set_style_bg_color(header, LV_COLOR_BG_LAYER2, 0);
+    lv_obj_set_style_border_width(header, 0, 0);
+    lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t* title = lv_label_create(header);
+    lv_label_set_text(title, "Morse Notes");
+    lv_obj_set_style_text_font(title, getThemeFonts()->font_input, 0);
+    lv_obj_set_style_text_color(title, LV_COLOR_TEXT_PRIMARY, 0);
+    lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
+
+    lv_obj_t* menu_container = lv_obj_create(screen);
+    lv_obj_set_size(menu_container, 400, 240);
+    lv_obj_center(menu_container);
+    lv_obj_set_style_bg_opa(menu_container, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(menu_container, 0, 0);
+    lv_obj_set_style_pad_all(menu_container, 10, 0);
+    lv_obj_set_flex_flow(menu_container, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(menu_container, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_row(menu_container, 15, 0);
+    lv_obj_clear_flag(menu_container, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t* list_btn = lv_btn_create(menu_container);
+    lv_obj_set_size(list_btn, 350, 55);
+    lv_obj_set_style_bg_color(list_btn, LV_COLOR_BG_CARD, 0);
+    lv_obj_set_style_bg_color(list_btn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
+    lv_obj_set_style_radius(list_btn, 10, 0);
+    lv_obj_t* list_lbl = lv_label_create(list_btn);
+    lv_label_set_text(list_lbl, LV_SYMBOL_LIST " List");
+    lv_obj_set_style_text_font(list_lbl, getThemeFonts()->font_input, 0);
+    lv_obj_center(list_lbl);
+    lv_obj_add_event_cb(list_btn, [](lv_event_t* e) {
+        onLVGLMenuSelect(MODE_MORSE_NOTES_LIST);
+    }, LV_EVENT_CLICKED, nullptr);
+    lv_obj_add_event_cb(list_btn, linear_nav_handler, LV_EVENT_KEY, nullptr);
+    addNavigableWidget(list_btn);
+
+    lv_obj_t* new_btn = lv_btn_create(menu_container);
+    lv_obj_set_size(new_btn, 350, 55);
+    lv_obj_set_style_bg_color(new_btn, LV_COLOR_BG_CARD_ALT, 0);
+    lv_obj_set_style_bg_color(new_btn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
+    lv_obj_set_style_radius(new_btn, 10, 0);
+    lv_obj_t* new_lbl = lv_label_create(new_btn);
+    lv_label_set_text(new_lbl, LV_SYMBOL_PLUS " New");
+    lv_obj_set_style_text_font(new_lbl, getThemeFonts()->font_input, 0);
+    lv_obj_center(new_lbl);
+    lv_obj_add_event_cb(new_btn, [](lv_event_t* e) {
+        onLVGLMenuSelect(MODE_MORSE_NOTES_RECORD);
+    }, LV_EVENT_CLICKED, nullptr);
+    lv_obj_add_event_cb(new_btn, linear_nav_handler, LV_EVENT_KEY, nullptr);
+    addNavigableWidget(new_btn);
+
+    lv_obj_t* settings_btn = lv_btn_create(menu_container);
+    lv_obj_set_size(settings_btn, 350, 55);
+    lv_obj_set_style_bg_color(settings_btn, LV_COLOR_BORDER_CARD, 0);
+    lv_obj_set_style_bg_color(settings_btn, LV_COLOR_BG_CARD_ACTIVE, LV_STATE_FOCUSED);
+    lv_obj_set_style_radius(settings_btn, 10, 0);
+    lv_obj_t* settings_lbl = lv_label_create(settings_btn);
+    lv_label_set_text(settings_lbl, LV_SYMBOL_SETTINGS " Settings");
+    lv_obj_set_style_text_font(settings_lbl, getThemeFonts()->font_input, 0);
+    lv_obj_center(settings_lbl);
+    lv_obj_add_event_cb(settings_btn, [](lv_event_t* e) {
+        onLVGLMenuSelect(MODE_MORSE_NOTES_SETTINGS);
+    }, LV_EVENT_CLICKED, nullptr);
+    lv_obj_add_event_cb(settings_btn, linear_nav_handler, LV_EVENT_KEY, nullptr);
+    addNavigableWidget(settings_btn);
+
+    lv_obj_t* footer = lv_label_create(screen);
+    lv_label_set_text(footer, "Arrows Navigate   ENTER Select   ESC Back");
+    lv_obj_set_style_text_font(footer, getThemeFonts()->font_body, 0);
+    lv_obj_set_style_text_color(footer, LV_COLOR_WARNING, 0);
+    lv_obj_align(footer, LV_ALIGN_BOTTOM_MID, 0, -5);
+
+    return screen;
+}
+
+/**
+ * Recording list (opened from landing via List).
+ */
+lv_obj_t* createMorseNotesListScreen() {
+    clearNavigationGroup();
+
     if (!mnLoadLibrary()) {
         Serial.println("[MorseNotes] ERROR: Failed to load library");
     }
 
     lv_obj_t* screen = createScreen();
     applyScreenStyle(screen);
-    mnLibraryScreen = screen;
+    mnNotesListScreen = screen;
 
-    // Header
+    createCompactStatusBar(screen);
+
     lv_obj_t* header = lv_obj_create(screen);
     lv_obj_set_size(header, SCREEN_WIDTH, HEADER_HEIGHT);
     lv_obj_set_pos(header, 0, 0);
     lv_obj_add_style(header, getStyleStatusBar(), 0);
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
-    // Status bar (WiFi + battery)
-    createCompactStatusBar(screen);
-
-    // Title
     lv_obj_t* title = lv_label_create(header);
-    lv_label_set_text(title, "Morse Notes Library");
+    lv_label_set_text(title, "Recordings");
     lv_obj_add_style(title, getStyleLabelTitle(), 0);
     lv_obj_align(title, LV_ALIGN_LEFT_MID, 15, 0);
-
-    // Settings button
-    lv_obj_t* settings_btn = lv_btn_create(header);
-    lv_obj_set_size(settings_btn, 45, 35);
-    lv_obj_align(settings_btn, LV_ALIGN_RIGHT_MID, -100, 0);
-    lv_obj_t* settings_lbl = lv_label_create(settings_btn);
-    lv_label_set_text(settings_lbl, LV_SYMBOL_SETTINGS);
-    lv_obj_center(settings_lbl);
-    lv_obj_add_event_cb(settings_btn, [](lv_event_t* e) {
-        onLVGLMenuSelect(MODE_MORSE_NOTES_SETTINGS);
-    }, LV_EVENT_CLICKED, nullptr);
-    lv_obj_add_event_cb(settings_btn, mnLibraryHeaderNavHandler, LV_EVENT_KEY, nullptr);
-    addNavigableWidget(settings_btn);
-    mnLibraryHeaderBtns[0] = settings_btn;
-
-    // New Recording button
-    lv_obj_t* new_btn = lv_btn_create(header);
-    lv_obj_set_size(new_btn, 100, 35);
-    lv_obj_align(new_btn, LV_ALIGN_RIGHT_MID, -5, 0);
-    lv_obj_set_style_bg_color(new_btn, LV_COLOR_SUCCESS, 0);
-    lv_obj_t* new_lbl = lv_label_create(new_btn);
-    lv_label_set_text(new_lbl, LV_SYMBOL_PLUS " New");
-    lv_obj_center(new_lbl);
-    lv_obj_add_event_cb(new_btn, [](lv_event_t* e) {
-        onLVGLMenuSelect(MODE_MORSE_NOTES_RECORD);
-    }, LV_EVENT_CLICKED, nullptr);
-    lv_obj_add_event_cb(new_btn, mnLibraryHeaderNavHandler, LV_EVENT_KEY, nullptr);
-    addNavigableWidget(new_btn);
-    mnLibraryHeaderBtns[1] = new_btn;
 
     // List container
     lv_obj_t* list = lv_obj_create(screen);
@@ -270,7 +277,7 @@ lv_obj_t* createMorseNotesLibraryScreen() {
 
     if (count == 0) {
         lv_obj_t* empty = lv_label_create(list);
-        lv_label_set_text(empty, "No recordings yet.\nPress +New to start.");
+        lv_label_set_text(empty, "No recordings yet.\nUse New on the Morse Notes menu.");
         lv_obj_set_style_text_align(empty, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_center(empty);
     } else {
@@ -514,8 +521,7 @@ static void mnSaveBtnClick(lv_event_t* e) {
             mnSaveDialog = nullptr;
         }
 
-        // Return to library
-        onLVGLMenuSelect(MODE_MORSE_NOTES_LIBRARY);
+        onLVGLMenuSelect(MODE_MORSE_NOTES_LIST);
     } else {
         Serial.println("[MorseNotes] ERROR: Failed to save recording");
     }
@@ -753,7 +759,6 @@ static void mnDoDiscardAndExit() {
     // Clean up keyer
     mnRecordKeyer = nullptr;
 
-    // Return to library
     onLVGLMenuSelect(MODE_MORSE_NOTES_LIBRARY);
 }
 
@@ -1045,7 +1050,7 @@ static void mnPlaybackSpeedAdjust(lv_event_t* e) {
 static void mnPlaybackDeleteConfirm(lv_event_t* e) {
     if (mnDeleteRecording(mnSelectedRecordingId)) {
         Serial.println("[MorseNotes] Recording deleted");
-        onLVGLMenuSelect(MODE_MORSE_NOTES_LIBRARY);
+        onLVGLMenuSelect(MODE_MORSE_NOTES_LIST);
     } else {
         Serial.println("[MorseNotes] ERROR: Failed to delete recording");
     }

@@ -237,10 +237,12 @@ lv_obj_t* createScreenForModeInt(int mode) {
     }
 
     // Morse Notes screens
-    if (mode >= MODE_MORSE_NOTES_LIBRARY && mode <= MODE_MORSE_NOTES_SETTINGS) {
+    if (mode >= MODE_MORSE_NOTES_LIBRARY && mode <= MODE_MORSE_NOTES_LIST) {
         switch (mode) {
             case MODE_MORSE_NOTES_LIBRARY:
                 return createMorseNotesLibraryScreen();
+            case MODE_MORSE_NOTES_LIST:
+                return createMorseNotesListScreen();
             case MODE_MORSE_NOTES_RECORD:
                 return createMorseNotesRecordScreen();
             case MODE_MORSE_NOTES_PLAYBACK:
@@ -420,6 +422,7 @@ void initializeModeInt(int mode) {
 
         // Morse Notes modes
         case MODE_MORSE_NOTES_LIBRARY:
+        case MODE_MORSE_NOTES_LIST:
         case MODE_MORSE_NOTES_RECORD:
         case MODE_MORSE_NOTES_PLAYBACK:
         case MODE_MORSE_NOTES_SETTINGS:
